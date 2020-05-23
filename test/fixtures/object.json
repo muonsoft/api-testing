@@ -8,6 +8,9 @@
   "arrayNode": [
     "arrayValue"
   ],
+  "objectNode": {
+    "objectKey": "objectValue"
+  },
   "complexNode": {
     "items": [
       "stringValue",

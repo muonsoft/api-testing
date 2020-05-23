@@ -53,6 +53,8 @@
 //
 //          // array assertions
 //          json.Node("$.arrayNode").IsArrayWithElementsCount(1)
+//          // object assertions
+//          json.Node("$.objectNode").IsObjectWithPropertiesCount(1)
 //
 //          // json path expression
 //          json.Node("$.complexNode.items[1].key").EqualToTheString("value")
