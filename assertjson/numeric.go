@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-// Asserts that the JSON node has an integer value.
+// IsInteger asserts that the JSON node has an integer value.
 func (node *AssertNode) IsInteger(msgAndArgs ...interface{}) {
 	if node.exists() {
 		float, ok := node.value.(float64)
@@ -19,14 +19,14 @@ func (node *AssertNode) IsInteger(msgAndArgs ...interface{}) {
 	}
 }
 
-// Asserts that the JSON node has a float value.
+// IsFloat asserts that the JSON node has a float value.
 func (node *AssertNode) IsFloat(msgAndArgs ...interface{}) {
 	if node.exists() {
 		assert.IsType(node.t, 0.0, node.value, msgAndArgs...)
 	}
 }
 
-// Asserts that the JSON node has an integer value equals to the given value.
+// EqualToTheInteger asserts that the JSON node has an integer value equals to the given value.
 func (node *AssertNode) EqualToTheInteger(expectedValue int, msgAndArgs ...interface{}) {
 	if node.exists() {
 		float, ok := node.value.(float64)
@@ -41,7 +41,7 @@ func (node *AssertNode) EqualToTheInteger(expectedValue int, msgAndArgs ...inter
 	}
 }
 
-// Asserts that the JSON node has a float value equals to the given value.
+// EqualToTheFloat asserts that the JSON node has a float value equals to the given value.
 func (node *AssertNode) EqualToTheFloat(expectedValue float64, msgAndArgs ...interface{}) {
 	if node.exists() {
 		assert.IsType(node.t, 0.0, node.value, msgAndArgs...)
@@ -49,7 +49,7 @@ func (node *AssertNode) EqualToTheFloat(expectedValue float64, msgAndArgs ...int
 	}
 }
 
-// Asserts that the JSON node has a number greater than the given value.
+// IsNumberGreaterThan asserts that the JSON node has a number greater than the given value.
 func (node *AssertNode) IsNumberGreaterThan(value float64, msgAndArgs ...interface{}) {
 	if node.exists() {
 		assert.IsType(node.t, 0.0, node.value, msgAndArgs...)
@@ -57,7 +57,7 @@ func (node *AssertNode) IsNumberGreaterThan(value float64, msgAndArgs ...interfa
 	}
 }
 
-// Asserts that the JSON node has a number greater than or equal to the given value.
+// IsNumberGreaterThanOrEqual asserts that the JSON node has a number greater than or equal to the given value.
 func (node *AssertNode) IsNumberGreaterThanOrEqual(value float64, msgAndArgs ...interface{}) {
 	if node.exists() {
 		assert.IsType(node.t, 0.0, node.value, msgAndArgs...)
@@ -65,7 +65,7 @@ func (node *AssertNode) IsNumberGreaterThanOrEqual(value float64, msgAndArgs ...
 	}
 }
 
-// Asserts that the JSON node has a number less than the given value.
+// IsNumberLessThan asserts that the JSON node has a number less than the given value.
 func (node *AssertNode) IsNumberLessThan(value float64, msgAndArgs ...interface{}) {
 	if node.exists() {
 		assert.IsType(node.t, 0.0, node.value, msgAndArgs...)
@@ -73,7 +73,7 @@ func (node *AssertNode) IsNumberLessThan(value float64, msgAndArgs ...interface{
 	}
 }
 
-// Asserts that the JSON node has a number less than or equal to the given value.
+// IsNumberLessThanOrEqual asserts that the JSON node has a number less than or equal to the given value.
 func (node *AssertNode) IsNumberLessThanOrEqual(value float64, msgAndArgs ...interface{}) {
 	if node.exists() {
 		assert.IsType(node.t, 0.0, node.value, msgAndArgs...)
@@ -81,7 +81,7 @@ func (node *AssertNode) IsNumberLessThanOrEqual(value float64, msgAndArgs ...int
 	}
 }
 
-// Asserts that the JSON node has a number with value in the given range.
+// IsNumberInRange asserts that the JSON node has a number with value in the given range.
 func (node *AssertNode) IsNumberInRange(min float64, max float64, msgAndArgs ...interface{}) {
 	if node.exists() {
 		assert.IsType(node.t, 0.0, node.value, msgAndArgs...)

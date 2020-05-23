@@ -1,4 +1,4 @@
-// Package provides methods for testing JSON values. Selecting JSON values provided by JSON Path Syntax.
+// Package assertjson provides methods for testing JSON values. Selecting JSON values provided by JSON Path Syntax.
 //
 // Example usage
 //
@@ -69,13 +69,13 @@ import (
 	"testing"
 )
 
-// Main structure that holds parsed JSON.
+// AssertJSON - main structure that holds parsed JSON.
 type AssertJSON struct {
 	t    *testing.T
 	data interface{}
 }
 
-// Structure for asserting JSON node.
+// AssertNode - structure for asserting JSON node.
 type AssertNode struct {
 	t     *testing.T
 	err   error
@@ -83,10 +83,10 @@ type AssertNode struct {
 	value interface{}
 }
 
-// Callback function used for asserting JSON nodes.
+// JSONAssertFunc - callback function used for asserting JSON nodes.
 type JSONAssertFunc func(json *AssertJSON)
 
-// Loads JSON from file and runs user callback for testing its nodes.
+// FileHas loads JSON from file and runs user callback for testing its nodes.
 func FileHas(t *testing.T, filename string, jsonAssert JSONAssertFunc) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -95,7 +95,7 @@ func FileHas(t *testing.T, filename string, jsonAssert JSONAssertFunc) {
 	Has(t, data, jsonAssert)
 }
 
-// Loads JSON from byte slice and runs user callback for testing its nodes.
+// Has - loads JSON from byte slice and runs user callback for testing its nodes.
 func Has(t *testing.T, data []byte, jsonAssert JSONAssertFunc) {
 	body := &AssertJSON{t: t}
 	err := json.Unmarshal(data, &body.data)
@@ -106,7 +106,7 @@ func Has(t *testing.T, data []byte, jsonAssert JSONAssertFunc) {
 	}
 }
 
-// JSON node found by JSON Path Syntax. Returns struct for asserting node values.
+// Node searches for JSON node by JSON Path Syntax. Returns struct for asserting the node values.
 func (j *AssertJSON) Node(path string) *AssertNode {
 	value, err := jsonpath.Read(j.data, path)
 

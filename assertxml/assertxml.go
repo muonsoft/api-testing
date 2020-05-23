@@ -1,4 +1,4 @@
-// Package provides methods for testing XML values. Selecting XML values provided by XML Path Syntax.
+// Package assertxml provides methods for testing XML values. Selecting XML values provided by XML Path Syntax.
 //
 // Example usage
 //    import (
@@ -35,13 +35,13 @@ import (
 	"testing"
 )
 
-// Main structure that holds parsed XML.
+// AssertXML - main structure that holds parsed XML.
 type AssertXML struct {
 	t   *testing.T
 	xml *xmlpath.Node
 }
 
-// Structure for asserting XML node.
+// AssertNode - structure for asserting XML node.
 type AssertNode struct {
 	t     *testing.T
 	found bool
@@ -49,10 +49,10 @@ type AssertNode struct {
 	value string
 }
 
-// Callback function used for asserting XML nodes.
+// XMLAssertFunc - callback function used for asserting XML nodes.
 type XMLAssertFunc func(xml *AssertXML)
 
-// Loads XML from file and runs user callback for testing its nodes.
+// FileHas loads XML from file and runs user callback for testing its nodes.
 func FileHas(t *testing.T, filename string, xmlAssert XMLAssertFunc) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -61,7 +61,7 @@ func FileHas(t *testing.T, filename string, xmlAssert XMLAssertFunc) {
 	Has(t, data, xmlAssert)
 }
 
-// Loads XML from byte slice and runs user callback for testing its nodes.
+// Has loads XML from byte slice and runs user callback for testing its nodes.
 func Has(t *testing.T, data []byte, xmlAssert XMLAssertFunc) {
 	xml, err := xmlpath.Parse(bytes.NewReader(data))
 	body := &AssertXML{
@@ -75,7 +75,7 @@ func Has(t *testing.T, data []byte, xmlAssert XMLAssertFunc) {
 	}
 }
 
-// XML node found by XML Path Syntax. Returns struct for asserting node values.
+// Node searches for XML node by XML Path Syntax. Returns struct for asserting the node values.
 func (x *AssertXML) Node(path string) *AssertNode {
 	p := xmlpath.MustCompile(path)
 	value, found := p.String(x.xml)
