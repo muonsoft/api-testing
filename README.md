@@ -1,5 +1,6 @@
 # API testing tools for Golang
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/muonsoft/api-testing)](https://goreportcard.com/report/github.com/muonsoft/api-testing)
 ![CI](https://github.com/muonsoft/api-testing/workflows/CI/badge.svg?branch=master)
 
 ## `assertjson` package
