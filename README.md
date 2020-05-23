@@ -1,5 +1,7 @@
 # API testing tools for Golang
 
+![CI](https://github.com/muonsoft/api-testing/workflows/CI/badge.svg?branch=master)
+
 ## `assertjson` package
 
 The `assertjson` package provides methods for testing JSON values. Selecting JSON values provided by JSON Path Syntax.
@@ -33,6 +35,7 @@ func TestYourAPI(t *testing.T) {
         json.Node("$.falseBooleanNode").IsFalse()
 
         // string assertions
+        json.Node("$.stringNode").IsString()
         json.Node("$.stringNode").EqualToTheString("stringValue")
         json.Node("$.stringNode").Matches("^string.*$")
         json.Node("$.stringNode").DoesNotMatch("^notMatch$")

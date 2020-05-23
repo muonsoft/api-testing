@@ -13,6 +13,7 @@ func TestFileHas(t *testing.T) {
 		json.Node("$.falseBooleanNode").IsFalse()
 
 		// string assertions
+		json.Node("$.stringNode").IsString()
 		json.Node("$.stringNode").EqualToTheString("stringValue")
 		json.Node("$.stringNode").Matches("^string.*$")
 		json.Node("$.stringNode").DoesNotMatch("^notMatch$")

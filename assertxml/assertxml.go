@@ -1,3 +1,29 @@
+// Package provides methods for testing XML values. Selecting XML values provided by XML Path Syntax.
+//
+// Example usage
+//    import (
+//        "net/http"
+//        "net/http/httptest"
+//        "testing"
+//        "github.com/muonsoft/api-testing/assertxml"
+//     )
+//
+//     func TestYourAPI(t *testing.T) {
+//        recorder := httptest.NewRecorder()
+//        handler := createHTTPHandler()
+//
+//        request, _ := http.NewRequest("GET", "/content", nil)
+//        handler.ServeHTTP(recorder, request)
+//
+//        assertxml.Has(t, recorder.Body.Bytes(), func(xml *AssertXML) {
+//            // common assertions
+//            xml.Node("/root/stringNode").Exists()
+//            xml.Node("/root/notExistingNode").DoesNotExist()
+//
+//            // string assertions
+//            xml.Node("/root/stringNode").EqualToTheString("stringValue")
+//        })
+//     }
 package assertxml
 
 import (
@@ -9,11 +35,13 @@ import (
 	"testing"
 )
 
+// Main structure that holds parsed XML.
 type AssertXML struct {
 	t   *testing.T
 	xml *xmlpath.Node
 }
 
+// Structure for asserting XML node.
 type AssertNode struct {
 	t     *testing.T
 	found bool
@@ -21,8 +49,10 @@ type AssertNode struct {
 	value string
 }
 
+// Callback function used for asserting XML nodes.
 type XMLAssertFunc func(xml *AssertXML)
 
+// Loads XML from file and runs user callback for testing its nodes.
 func FileHas(t *testing.T, filename string, xmlAssert XMLAssertFunc) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -31,6 +61,7 @@ func FileHas(t *testing.T, filename string, xmlAssert XMLAssertFunc) {
 	Has(t, data, xmlAssert)
 }
 
+// Loads XML from byte slice and runs user callback for testing its nodes.
 func Has(t *testing.T, data []byte, xmlAssert XMLAssertFunc) {
 	xml, err := xmlpath.Parse(bytes.NewReader(data))
 	body := &AssertXML{
@@ -44,6 +75,7 @@ func Has(t *testing.T, data []byte, xmlAssert XMLAssertFunc) {
 	}
 }
 
+// XML node found by XML Path Syntax. Returns struct for asserting node values.
 func (x *AssertXML) Node(path string) *AssertNode {
 	p := xmlpath.MustCompile(path)
 	value, found := p.String(x.xml)

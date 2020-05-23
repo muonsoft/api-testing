@@ -2,6 +2,14 @@ package assertjson
 
 import "github.com/stretchr/testify/assert"
 
+// Asserts that the JSON node has a string value.
+func (node *AssertNode) IsString(msgAndArgs ...interface{}) {
+	if node.exists() {
+		assert.IsType(node.t, "", node.value, msgAndArgs...)
+	}
+}
+
+// Asserts that the JSON node has a string value equals to the given value.
 func (node *AssertNode) EqualToTheString(expectedValue string, msgAndArgs ...interface{}) {
 	if node.exists() {
 		assert.IsType(node.t, "", node.value, msgAndArgs...)
@@ -9,6 +17,7 @@ func (node *AssertNode) EqualToTheString(expectedValue string, msgAndArgs ...int
 	}
 }
 
+// Asserts that the JSON node has a string value that matches the regular expression.
 func (node *AssertNode) Matches(regexp string, msgAndArgs ...interface{}) {
 	if node.exists() {
 		assert.IsType(node.t, "", node.value, msgAndArgs...)
@@ -16,6 +25,7 @@ func (node *AssertNode) Matches(regexp string, msgAndArgs ...interface{}) {
 	}
 }
 
+// Asserts that the JSON node has a string value that does not match the regular expression.
 func (node *AssertNode) DoesNotMatch(regexp string, msgAndArgs ...interface{}) {
 	if node.exists() {
 		assert.IsType(node.t, "", node.value, msgAndArgs...)
@@ -23,18 +33,21 @@ func (node *AssertNode) DoesNotMatch(regexp string, msgAndArgs ...interface{}) {
 	}
 }
 
+// Asserts that the JSON node has a string value that contains a string.
 func (node *AssertNode) Contains(contain string, msgAndArgs ...interface{}) {
 	if node.exists() {
 		assert.Contains(node.t, node.value, contain, msgAndArgs...)
 	}
 }
 
+// Asserts that the JSON node has a string value that does not contain a string.
 func (node *AssertNode) DoesNotContain(contain string, msgAndArgs ...interface{}) {
 	if node.exists() {
 		assert.NotContains(node.t, node.value, contain, msgAndArgs...)
 	}
 }
 
+// Asserts that the JSON node has a string value with length equal to the given value.
 func (node *AssertNode) IsStringWithLength(length int, msgAndArgs ...interface{}) {
 	if node.exists() {
 		assert.IsType(node.t, "", node.value, msgAndArgs...)
@@ -42,6 +55,7 @@ func (node *AssertNode) IsStringWithLength(length int, msgAndArgs ...interface{}
 	}
 }
 
+// Asserts that the JSON node has a string value with length in the given range.
 func (node *AssertNode) IsStringWithLengthInRange(min int, max int, msgAndArgs ...interface{}) {
 	if node.exists() {
 		assert.IsType(node.t, "", node.value, msgAndArgs...)
