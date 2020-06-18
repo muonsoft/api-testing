@@ -1,4 +1,6 @@
 {
+  "@id": "json-ld-id",
+  "hydra:members": "hydraMembers",
   "nullNode": null,
   "falseBooleanNode": false,
   "trueBooleanNode": true,

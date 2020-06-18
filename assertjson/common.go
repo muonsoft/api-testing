@@ -1,18 +1,21 @@
 package assertjson
 
-import "github.com/stretchr/testify/assert"
+import (
+	"fmt"
+	"github.com/stretchr/testify/assert"
+)
 
 // Exists asserts that the JSON node exists.
 func (node *AssertNode) Exists(msgAndArgs ...interface{}) {
 	if node.err != nil {
-		assert.Failf(node.t, "failed asserting that json node '%s' exists", node.path, msgAndArgs...)
+		assert.Fail(node.t, fmt.Sprintf("failed asserting that json node '%s' exists", node.path), msgAndArgs...)
 	}
 }
 
 // DoesNotExist asserts that the JSON node does not exist.
 func (node *AssertNode) DoesNotExist(msgAndArgs ...interface{}) {
 	if node.err == nil {
-		assert.Failf(node.t, "failed asserting that json node '%s' does not exist", node.path, msgAndArgs...)
+		assert.Fail(node.t, fmt.Sprintf("failed asserting that json node '%s' does not exist", node.path), msgAndArgs...)
 	}
 }
 
