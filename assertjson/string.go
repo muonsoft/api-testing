@@ -1,6 +1,10 @@
 package assertjson
 
-import "github.com/stretchr/testify/assert"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 // IsString asserts that the JSON node has a string value.
 func (node *AssertNode) IsString(msgAndArgs ...interface{}) {
@@ -61,5 +65,12 @@ func (node *AssertNode) IsStringWithLengthInRange(min int, max int, msgAndArgs .
 		assert.IsType(node.t, "", node.value, msgAndArgs...)
 		assert.GreaterOrEqual(node.t, len(node.value.(string)), min, msgAndArgs...)
 		assert.LessOrEqual(node.t, len(node.value.(string)), max, msgAndArgs...)
+	}
+}
+
+// AssertString assert that the JSON node has a string value and it satisfies by user function assertFunc.
+func (node *AssertNode) AssertString(assertFunc func(t *testing.T, value string)) {
+	if node.exists() && assert.IsType(node.t, "", node.value) {
+		assertFunc(node.t, node.value.(string))
 	}
 }

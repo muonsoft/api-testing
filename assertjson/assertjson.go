@@ -91,6 +91,7 @@ type JSONAssertFunc func(json *AssertJSON)
 
 // FileHas loads JSON from file and runs user callback for testing its nodes.
 func FileHas(t *testing.T, filename string, jsonAssert JSONAssertFunc) {
+	t.Helper()
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		assert.Failf(t, "failed to read file '%s': %s", filename, err.Error())
@@ -100,6 +101,7 @@ func FileHas(t *testing.T, filename string, jsonAssert JSONAssertFunc) {
 
 // Has - loads JSON from byte slice and runs user callback for testing its nodes.
 func Has(t *testing.T, data []byte, jsonAssert JSONAssertFunc) {
+	t.Helper()
 	body := &AssertJSON{t: t}
 	err := json.Unmarshal(data, &body.data)
 	if err != nil {

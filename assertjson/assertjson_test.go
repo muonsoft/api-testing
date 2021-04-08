@@ -1,6 +1,10 @@
 package assertjson
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestFileHas(t *testing.T) {
 	FileHas(t, "./../test/fixtures/object.json", func(json *AssertJSON) {
@@ -15,6 +19,9 @@ func TestFileHas(t *testing.T) {
 		// string assertions
 		json.Node("/stringNode").IsString()
 		json.Node("/stringNode").EqualToTheString("stringValue")
+		json.Node("/stringNode").AssertString(func(t *testing.T, value string) {
+			assert.Equal(t, "stringValue", value)
+		})
 		json.Node("/stringNode").Matches("^string.*$")
 		json.Node("/stringNode").DoesNotMatch("^notMatch$")
 		json.Node("/stringNode").Contains("string")
