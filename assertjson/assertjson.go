@@ -66,21 +66,22 @@ package assertjson
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"github.com/xeipuuv/gojsonpointer"
 	"io/ioutil"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/xeipuuv/gojsonpointer"
 )
 
 // AssertJSON - main structure that holds parsed JSON.
 type AssertJSON struct {
-	t    *testing.T
+	t    testing.TB
 	data interface{}
 }
 
 // AssertNode - structure for asserting JSON node.
 type AssertNode struct {
-	t     *testing.T
+	t     testing.TB
 	err   error
 	path  string
 	value interface{}
@@ -90,17 +91,18 @@ type AssertNode struct {
 type JSONAssertFunc func(json *AssertJSON)
 
 // FileHas loads JSON from file and runs user callback for testing its nodes.
-func FileHas(t *testing.T, filename string, jsonAssert JSONAssertFunc) {
+func FileHas(t testing.TB, filename string, jsonAssert JSONAssertFunc) {
 	t.Helper()
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		assert.Failf(t, "failed to read file '%s': %s", filename, err.Error())
+	} else {
+		Has(t, data, jsonAssert)
 	}
-	Has(t, data, jsonAssert)
 }
 
 // Has - loads JSON from byte slice and runs user callback for testing its nodes.
-func Has(t *testing.T, data []byte, jsonAssert JSONAssertFunc) {
+func Has(t testing.TB, data []byte, jsonAssert JSONAssertFunc) {
 	t.Helper()
 	body := &AssertJSON{t: t}
 	err := json.Unmarshal(data, &body.data)
@@ -113,6 +115,7 @@ func Has(t *testing.T, data []byte, jsonAssert JSONAssertFunc) {
 
 // Node searches for JSON node by JSON Path Syntax. Returns struct for asserting the node values.
 func (j *AssertJSON) Node(path string) *AssertNode {
+	j.t.Helper()
 	var value interface{}
 
 	pointer, err := gojsonpointer.NewJsonPointer(path)
@@ -128,9 +131,43 @@ func (j *AssertJSON) Node(path string) *AssertNode {
 	}
 }
 
+// Nodef searches for JSON node by JSON Path Syntax. Returns struct for asserting the node values.
+// It calculates path by applying fmt.Sprintf function.
+func (j *AssertJSON) Nodef(format string, a ...interface{}) *AssertNode {
+	j.t.Helper()
+	return j.Node(fmt.Sprintf(format, a...))
+}
+
+// At is used to test assertions on some node in a batch. It returns AssertJSON object on that node.
+func (j *AssertJSON) At(path string) *AssertJSON {
+	j.t.Helper()
+	var value interface{}
+
+	pointer, err := gojsonpointer.NewJsonPointer(path)
+	if err == nil {
+		value, _, err = pointer.Get(j.data)
+	}
+	if err != nil {
+		j.t.Errorf(`failed to find json node "%s": %v`, path, err)
+	}
+
+	return &AssertJSON{
+		t:    j.t,
+		data: value,
+	}
+}
+
+// Atf is used to test assertions on some node in a batch. It returns AssertJSON object on that node.
+// It calculates path by applying fmt.Sprintf function.
+func (j *AssertJSON) Atf(format string, a ...interface{}) *AssertJSON {
+	j.t.Helper()
+	return j.At(fmt.Sprintf(format, a...))
+}
+
 func (node *AssertNode) exists() bool {
+	node.t.Helper()
 	if node.err != nil {
-		assert.Fail(node.t, fmt.Sprintf("failed to find json node '%s': %v", node.path, node.err))
+		node.t.Errorf(`failed to find json node "%s": %v`, node.path, node.err)
 	}
 
 	return node.err == nil

@@ -7,7 +7,7 @@ import (
 )
 
 func TestFileHas(t *testing.T) {
-	FileHas(t, "./../test/fixtures/object.json", func(json *AssertJSON) {
+	FileHas(t, "./../test/testdata/object.json", func(json *AssertJSON) {
 		// common assertions
 		json.Node("/nullNode").Exists()
 		json.Node("/notExistingNode").DoesNotExist()
@@ -19,7 +19,7 @@ func TestFileHas(t *testing.T) {
 		// string assertions
 		json.Node("/stringNode").IsString()
 		json.Node("/stringNode").EqualToTheString("stringValue")
-		json.Node("/stringNode").AssertString(func(t *testing.T, value string) {
+		json.Node("/stringNode").AssertString(func(t testing.TB, value string) {
 			assert.Equal(t, "stringValue", value)
 		})
 		json.Node("/stringNode").Matches("^string.*$")
@@ -53,9 +53,14 @@ func TestFileHas(t *testing.T) {
 
 		// json pointer expression
 		json.Node("/complexNode/items/1/key").EqualToTheString("value")
+		json.Nodef("/complexNode/items/%d/key", 1).EqualToTheString("value")
 
 		// complex keys
 		json.Node("/@id").EqualToTheString("json-ld-id")
 		json.Node("/hydra:members").EqualToTheString("hydraMembers")
+
+		// complex assertions
+		json.At("/complexNode").Node("/items/1/key").EqualToTheString("value")
+		json.Atf("/complexNode/%s", "items").Node("/1/key").EqualToTheString("value")
 	})
 }
