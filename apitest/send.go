@@ -53,7 +53,7 @@ func HandlePATCH(tb testing.TB, handler http.Handler, url string, body io.Reader
 // HandleDELETE is an alias for HandleRequest that builds the DELETE request from url and options.
 func HandleDELETE(tb testing.TB, handler http.Handler, url string, options ...RequestOption) *AssertResponse {
 	tb.Helper()
-	return handleRequest(tb, handler, http.MethodPatch, url, nil, options...)
+	return handleRequest(tb, handler, http.MethodDelete, url, nil, options...)
 }
 
 func handleRequest(tb testing.TB, handler http.Handler, method, url string, body io.Reader, options ...RequestOption) *AssertResponse {
