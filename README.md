@@ -1,5 +1,9 @@
 # API testing tools for Golang
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/muonsoft/api-testing.svg)](https://pkg.go.dev/github.com/muonsoft/api-testing)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/muonsoft/api-testing)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/muonsoft/api-testing)
+![GitHub](https://img.shields.io/github/license/muonsoft/api-testing)
 [![Go Report Card](https://goreportcard.com/badge/github.com/muonsoft/api-testing)](https://goreportcard.com/report/github.com/muonsoft/api-testing)
 ![CI](https://github.com/muonsoft/api-testing/workflows/CI/badge.svg?branch=master)
 
@@ -33,7 +37,7 @@ func TestYourAPI(t *testing.T) {
     response.IsOK()
     response.HasContentType("application/json")
     response.HasJSON(func(json *assertjson.AssertJSON) {
-        json.Node("ok").IsTrue()
+        json.Node("/ok").IsTrue()
     })
 }
 ```

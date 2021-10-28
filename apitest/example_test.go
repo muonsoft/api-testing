@@ -25,7 +25,7 @@ func ExampleHandleGET() {
 	response.IsOK()
 	response.HasContentType("application/json")
 	response.HasJSON(func(json *assertjson.AssertJSON) {
-		json.Node("ok").IsTrue()
+		json.Node("/ok").IsTrue()
 	})
 	// Output:
 	// request method: GET
