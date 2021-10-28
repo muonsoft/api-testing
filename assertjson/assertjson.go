@@ -69,22 +69,23 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/xeipuuv/gojsonpointer"
 )
 
 // AssertJSON - main structure that holds parsed JSON.
 type AssertJSON struct {
 	t    testing.TB
+	path string
 	data interface{}
 }
 
 // AssertNode - structure for asserting JSON node.
 type AssertNode struct {
-	t     testing.TB
-	err   error
-	path  string
-	value interface{}
+	t          testing.TB
+	err        error
+	pathPrefix string
+	path       string
+	value      interface{}
 }
 
 // JSONAssertFunc - callback function used for asserting JSON nodes.
@@ -95,7 +96,7 @@ func FileHas(t testing.TB, filename string, jsonAssert JSONAssertFunc) {
 	t.Helper()
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
-		assert.Failf(t, "failed to read file '%s': %s", filename, err.Error())
+		t.Errorf("failed to read file '%s': %s", filename, err.Error())
 	} else {
 		Has(t, data, jsonAssert)
 	}
@@ -107,7 +108,7 @@ func Has(t testing.TB, data []byte, jsonAssert JSONAssertFunc) {
 	body := &AssertJSON{t: t}
 	err := json.Unmarshal(data, &body.data)
 	if err != nil {
-		assert.Failf(t, "data has invalid JSON: %s", err.Error())
+		t.Errorf("data has invalid JSON: %s", err.Error())
 	} else {
 		jsonAssert(body)
 	}
@@ -124,10 +125,11 @@ func (j *AssertJSON) Node(path string) *AssertNode {
 	}
 
 	return &AssertNode{
-		t:     j.t,
-		err:   err,
-		path:  path,
-		value: value,
+		t:          j.t,
+		err:        err,
+		pathPrefix: j.path,
+		path:       path,
+		value:      value,
 	}
 }
 
@@ -153,6 +155,7 @@ func (j *AssertJSON) At(path string) *AssertJSON {
 
 	return &AssertJSON{
 		t:    j.t,
+		path: j.path + path,
 		data: value,
 	}
 }
@@ -167,7 +170,7 @@ func (j *AssertJSON) Atf(format string, a ...interface{}) *AssertJSON {
 func (node *AssertNode) exists() bool {
 	node.t.Helper()
 	if node.err != nil {
-		node.t.Errorf(`failed to find json node "%s": %v`, node.path, node.err)
+		node.t.Errorf(`failed to find json node "%s": %v`, node.pathPrefix+node.path, node.err)
 	}
 
 	return node.err == nil

@@ -12,11 +12,21 @@ func (node *AssertNode) IsInteger(msgAndArgs ...interface{}) {
 	if node.exists() {
 		float, ok := node.value.(float64)
 		if !ok {
-			assert.Failf(node.t, "value at path '%s' is not numeric", node.path, msgAndArgs...)
+			assert.Failf(
+				node.t,
+				`value at path "%s" is not numeric`,
+				node.pathPrefix+node.path,
+				msgAndArgs...,
+			)
 		}
 		_, fractional := math.Modf(float)
 		if fractional != 0 {
-			assert.Failf(node.t, "value at path '%s' is float, not integer", node.path, msgAndArgs...)
+			assert.Failf(
+				node.t,
+				`value at path "%s" is float, not integer`,
+				node.pathPrefix+node.path,
+				msgAndArgs...,
+			)
 		}
 	}
 }
@@ -35,11 +45,21 @@ func (node *AssertNode) EqualToTheInteger(expectedValue int, msgAndArgs ...inter
 	if node.exists() {
 		float, ok := node.value.(float64)
 		if !ok {
-			assert.Failf(node.t, "value at path '%s' is not numeric", node.path, msgAndArgs...)
+			assert.Failf(
+				node.t,
+				`value at path "%s" is not numeric`,
+				node.pathPrefix+node.path,
+				msgAndArgs...,
+			)
 		}
 		integer, fractional := math.Modf(float)
 		if fractional != 0 {
-			assert.Failf(node.t, "value at path '%s' is float, not integer", node.path, msgAndArgs...)
+			assert.Failf(
+				node.t,
+				`value at path "%s" is float, not integer`,
+				node.pathPrefix+node.path,
+				msgAndArgs...,
+			)
 		}
 		assert.Equal(node.t, expectedValue, int(integer), msgAndArgs...)
 	}

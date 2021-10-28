@@ -10,7 +10,11 @@ import (
 func (node *AssertNode) Exists(msgAndArgs ...interface{}) {
 	node.t.Helper()
 	if node.err != nil {
-		assert.Fail(node.t, fmt.Sprintf("failed asserting that json node '%s' exists", node.path), msgAndArgs...)
+		assert.Fail(
+			node.t,
+			fmt.Sprintf(`failed asserting that json node "%s" exists`, node.pathPrefix+node.path),
+			msgAndArgs...,
+		)
 	}
 }
 
@@ -18,7 +22,11 @@ func (node *AssertNode) Exists(msgAndArgs ...interface{}) {
 func (node *AssertNode) DoesNotExist(msgAndArgs ...interface{}) {
 	node.t.Helper()
 	if node.err == nil {
-		assert.Fail(node.t, fmt.Sprintf("failed asserting that json node '%s' does not exist", node.path), msgAndArgs...)
+		assert.Fail(
+			node.t,
+			fmt.Sprintf(`failed asserting that json node "%s" does not exist`, node.pathPrefix+node.path),
+			msgAndArgs...,
+		)
 	}
 }
 

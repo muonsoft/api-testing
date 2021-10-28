@@ -9,7 +9,7 @@ import (
 	"github.com/muonsoft/api-testing/assertjson"
 )
 
-func ExampleSendGET() {
+func ExampleHandleGET() {
 	handler := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		fmt.Println("request method:", request.Method)
 		fmt.Println("request url:", request.URL.String())
@@ -19,7 +19,8 @@ func ExampleSendGET() {
 		writer.Write([]byte(`{"ok":true}`))
 	})
 
-	response := apitest.SendGET(&testing.T{}, handler, "/example")
+	// HandleGET builds and sends GET request to handler
+	response := apitest.HandleGET(&testing.T{}, handler, "/example")
 
 	response.IsOK()
 	response.HasContentType("application/json")
