@@ -3,6 +3,41 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/muonsoft/api-testing)](https://goreportcard.com/report/github.com/muonsoft/api-testing)
 ![CI](https://github.com/muonsoft/api-testing/workflows/CI/badge.svg?branch=master)
 
+## `apitest` package
+
+The `apitest` package provides methods for testing client-server communication.
+It can be used to test `http.Handler` to build complex assertions on the HTTP responses.
+
+Example
+
+```go
+package yours
+
+import (
+	"net/http"
+	"testing"
+	"github.com/muonsoft/api-testing/apitest"
+	"github.com/muonsoft/api-testing/assertjson"
+)
+
+func TestYourAPI(t *testing.T) {
+    handler := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+        writer.WriteHeader(http.StatusOK)
+        writer.Header().Set("Content-Type", "application/json")
+        writer.Write([]byte(`{"ok":true}`))
+    })
+    
+    // HandleGET builds and sends GET request to handler
+    response := apitest.HandleGET(t, handler, "/example")
+    
+    response.IsOK()
+    response.HasContentType("application/json")
+    response.HasJSON(func(json *assertjson.AssertJSON) {
+        json.Node("ok").IsTrue()
+    })
+}
+```
+
 ## `assertjson` package
 
 The `assertjson` package provides methods for testing JSON values. Selecting JSON values provided by [JSON Pointer Syntax](https://tools.ietf.org/html/rfc6901).
