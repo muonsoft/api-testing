@@ -11,20 +11,31 @@ It can be used to test `http.Handler` to build complex assertions on the HTTP re
 Example
 
 ```go
-handler := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-    writer.WriteHeader(http.StatusOK)
-    writer.Header().Set("Content-Type", "application/json")
-    writer.Write([]byte(`{"ok":true}`))
-})
+package yours
 
-// HandleGET builds and sends GET request to handler
-response := apitest.HandleGET(&testing.T{}, handler, "/example")
+import (
+	"net/http"
+	"testing"
+	"github.com/muonsoft/api-testing/apitest"
+	"github.com/muonsoft/api-testing/assertjson"
+)
 
-response.IsOK()
-response.HasContentType("application/json")
-response.HasJSON(func(json *assertjson.AssertJSON) {
-    json.Node("ok").IsTrue()
-})
+func TestYourAPI(t *testing.T) {
+    handler := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+        writer.WriteHeader(http.StatusOK)
+        writer.Header().Set("Content-Type", "application/json")
+        writer.Write([]byte(`{"ok":true}`))
+    })
+    
+    // HandleGET builds and sends GET request to handler
+    response := apitest.HandleGET(t, handler, "/example")
+    
+    response.IsOK()
+    response.HasContentType("application/json")
+    response.HasJSON(func(json *assertjson.AssertJSON) {
+        json.Node("ok").IsTrue()
+    })
+}
 ```
 
 ## `assertjson` package
