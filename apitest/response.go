@@ -41,6 +41,7 @@ func (r *AssertResponse) HasCode(code int) {
 			r.recorder.Code,
 			http.StatusText(r.recorder.Code),
 		)
+		r.logResponse()
 	}
 }
 
@@ -164,14 +165,14 @@ func (r *AssertResponse) HasXML(xmlAssert assertxml.XMLAssertFunc) {
 // Print prints response headers and body to console. Use it for debug purposes.
 func (r *AssertResponse) Print() {
 	r.t.Helper()
-	headers := r.printHeaders()
+	headers := r.formatHeaders()
 	r.t.Log(headers + r.recorder.Body.String())
 }
 
 // PrintJSON prints response headers and indented JSON body to console. Use it for debug purposes.
 func (r *AssertResponse) PrintJSON() {
 	r.t.Helper()
-	headers := r.printHeaders()
+	headers := r.formatHeaders()
 	var body interface{}
 	err := json.Unmarshal(r.recorder.Body.Bytes(), &body)
 	if err != nil {
@@ -183,7 +184,20 @@ func (r *AssertResponse) PrintJSON() {
 	r.t.Log(headers + string(printableJSON))
 }
 
-func (r *AssertResponse) printHeaders() string {
+func (r *AssertResponse) logResponse() {
+	r.t.Helper()
+	headers := r.formatHeaders()
+	var body interface{}
+	err := json.Unmarshal(r.recorder.Body.Bytes(), &body)
+	if err != nil {
+		r.t.Log(headers + r.recorder.Body.String())
+		return
+	}
+	printableJSON, _ := json.MarshalIndent(body, "", "\t")
+	r.t.Log(headers + string(printableJSON))
+}
+
+func (r *AssertResponse) formatHeaders() string {
 	r.t.Helper()
 	s := &strings.Builder{}
 	s.WriteString("\n")
