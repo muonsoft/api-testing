@@ -54,6 +54,7 @@ Example
 package yours
 
 import (
+    "fmt"
     "net/http"
     "net/http/httptest"
     "testing"
@@ -63,7 +64,7 @@ import (
 
 func TestYourAPI(t *testing.T) {
     recorder := httptest.NewRecorder()
-    handler := createHTTPHandler()
+    handler := newHTTPHandler()
 
     request := httptest.NewRequest("GET", "/content", nil)
     handler.ServeHTTP(recorder, request)
@@ -151,6 +152,14 @@ func TestYourAPI(t *testing.T) {
         json.Node("/arrayNode").IsArray().WithLengthLessThan(2)
         json.Node("/arrayNode").IsArray().WithLengthLessThanOrEqual(1)
         json.Node("/arrayNode").IsArray().WithUniqueElements()
+
+        // string values assertions
+        json.Node("/uuid").IsString().WithUUID()
+        json.Node("/uuid").IsUUID().NotNil().Version(4).Variant(1)
+        json.Node("/nilUUID").IsUUID().Nil()
+        json.Node("/email").IsEmail()
+        json.Node("/email").IsHTML5Email()
+        json.Node("/url").IsURL().WithSchemas("https").WithHosts("example.com")
 
         // object assertions
         json.Node("/objectNode").IsObjectWithPropertiesCount(1)

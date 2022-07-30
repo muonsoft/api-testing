@@ -2,6 +2,7 @@ package assertjson_test
 
 import (
 	"fmt"
+	"net/url"
 	"regexp"
 	"testing"
 
@@ -87,6 +88,14 @@ func TestFileHas(t *testing.T) {
 		json.Node("/floatNode").IsNumberLessThan(124)
 		json.Node("/floatNode").IsNumberLessThanOrEqual(123.123)
 
+		// string values assertions
+		json.Node("/uuid").IsString().WithUUID()
+		json.Node("/uuid").IsUUID().NotNil().Version(4).Variant(1)
+		json.Node("/nilUUID").IsUUID().Nil()
+		json.Node("/email").IsEmail()
+		json.Node("/email").IsHTML5Email()
+		json.Node("/url").IsURL().WithSchemas("https").WithHosts("example.com")
+
 		// array assertions
 		json.Node("/arrayNode").IsArrayWithElementsCount(1)
 		json.Node("/arrayNode").IsArray()
@@ -128,6 +137,7 @@ func TestFileHas(t *testing.T) {
 		assert.Equal(t, 123.123, json.Node("/floatNode").Float())
 		assert.Equal(t, 123, json.Node("/integerNode").Integer())
 		assert.JSONEq(t, `{"objectKey": "objectValue"}`, string(json.Node("/objectNode").JSON()))
+		assert.Equal(t, "23e98a0c-26c8-410f-978f-d1d67228af87", json.Node("/uuid").IsUUID().Value().String())
 	})
 }
 
@@ -817,6 +827,8 @@ func TestHas(t *testing.T) {
 					WithLengthGreaterThanOrEqual(0).
 					WithLengthLessThan(0).
 					WithLengthLessThanOrEqual(0).
+					IsEmail().
+					IsHTML5Email().
 					That(func(s string) error { return nil }).
 					Assert(func(tb testing.TB, value string) { tb.Helper() })
 			},
@@ -1111,6 +1123,248 @@ func TestHas(t *testing.T) {
 			},
 			wantMessages: []string{
 				"failed asserting that JSON node \"/key\" is object with unique elements, duplicated elements",
+			},
+		},
+		{
+			name: "JSON node is object fails once for a chain",
+			json: `{"key": null}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").
+					IsObject().
+					WithPropertiesCount(0).
+					WithPropertiesCountGreaterThan(0).
+					WithPropertiesCountGreaterThanOrEqual(0).
+					WithPropertiesCountLessThan(0).
+					WithPropertiesCountLessThanOrEqual(0).
+					WithUniqueElements()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is object`,
+			},
+		},
+		{
+			name: "JSON node is UUID",
+			json: `{"key": "bf0d10a1-d74c-436a-9db1-77c23b5e464f"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsUUID()
+			},
+		},
+		{
+			name: "JSON node is UUID fails",
+			json: `{"key": "value"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsUUID()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is UUID, actual is "value"`,
+			},
+		},
+		{
+			name: "JSON node is nil UUID",
+			json: `{"key": "00000000-0000-0000-0000-000000000000"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsUUID().Nil()
+			},
+		},
+		{
+			name: "JSON node is nil UUID fails",
+			json: `{"key": "bf0d10a1-d74c-436a-9db1-77c23b5e464f"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsUUID().Nil()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is nil UUID, actual is "bf0d10a1-d74c-436a-9db1-77c23b5e464f"`,
+			},
+		},
+		{
+			name: "JSON node is not nil UUID",
+			json: `{"key": "bf0d10a1-d74c-436a-9db1-77c23b5e464f"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsUUID().NotNil()
+			},
+		},
+		{
+			name: "JSON node is not nil UUID fails",
+			json: `{"key": "00000000-0000-0000-0000-000000000000"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsUUID().NotNil()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is not nil UUID, actual is "00000000-0000-0000-0000-000000000000"`,
+			},
+		},
+		{
+			name: "JSON node is UUID v4",
+			json: `{"key": "bf0d10a1-d74c-436a-9db1-77c23b5e464f"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsUUID().Version(4)
+			},
+		},
+		{
+			name: "JSON node is UUID v4 fails",
+			json: `{"key": "00000000-0000-0000-0000-000000000000"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsUUID().Version(4)
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is UUID of version 4, actual is 0`,
+			},
+		},
+		{
+			name: "JSON node is UUID variant 1",
+			json: `{"key": "a67e4bfc-1039-11ed-861d-0242ac120002"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsUUID().Variant(1)
+			},
+		},
+		{
+			name: "JSON node is UUID variant 1 fails",
+			json: `{"key": "00000000-0000-0000-0000-000000000000"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsUUID().Variant(1)
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is UUID of variant 1, actual is 0`,
+			},
+		},
+		{
+			name: "JSON node is UUID fails once for a chain",
+			json: `{"key": null}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsUUID().Nil().NotNil().Version(0).Variant(0).Value()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is string`,
+			},
+		},
+		{
+			name: "JSON node is email",
+			json: `{"key": "user@example.com"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsEmail()
+			},
+		},
+		{
+			name: "JSON node is email fails",
+			json: `{"key": "user @ example.com"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsEmail()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is email, actual is "user @ example.com"`,
+			},
+		},
+		{
+			name: "JSON node is HTML5 email",
+			json: `{"key": "user@example.com"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsHTML5Email()
+			},
+		},
+		{
+			name: "JSON node is HTML5 email fails",
+			json: `{"key": "user @ example.com"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsHTML5Email()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is email (HTML5 format), actual is "user @ example.com"`,
+			},
+		},
+		{
+			name: "JSON node is URL",
+			json: `{"key": "https://example.com"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsURL()
+			},
+		},
+		{
+			name: "JSON node is URL fails",
+			json: `{"key": "invalid\\:"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsURL()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is URL, actual is "invalid\:"`,
+			},
+		},
+		{
+			name: "JSON node is URL validation fails",
+			json: `{"key": "http://example.com/exploit.html?not_a%hex"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsURL()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is URL, actual is "http://example.com/exploit.html?not_a%hex"`,
+			},
+		},
+		{
+			name: "JSON node is URL with schemas",
+			json: `{"key": "https://example.com"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsURL().WithSchemas("http", "https")
+			},
+		},
+		{
+			name: "JSON node is URL with schemas fails",
+			json: `{"key": "ftp://example.com"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsURL().WithSchemas("http", "https")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is URL with schemas "http", "https", actual is "ftp"`,
+			},
+		},
+		{
+			name: "JSON node is URL with hosts",
+			json: `{"key": "https://example.com"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsURL().WithHosts("example.com", "example.net")
+			},
+		},
+		{
+			name: "JSON node is URL with hosts fails",
+			json: `{"key": "https://example.dev"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsURL().WithHosts("example.com", "example.net")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is URL with hosts "example.com", "example.net", actual is "example.dev"`,
+			},
+		},
+		{
+			name: "JSON node is URL checked by custom function",
+			json: `{"key": "https://example.com"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsURL().That(func(u *url.URL) error {
+					return nil
+				})
+			},
+		},
+		{
+			name: "JSON node is URL checked by custom function fails",
+			json: `{"key": "https://example.com"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsURL().That(func(u *url.URL) error {
+					return fmt.Errorf("error")
+				})
+			},
+			wantMessages: []string{
+				`failed asserting JSON node "/key": error`,
+			},
+		},
+		{
+			name: "JSON node is URL fails once for a chain",
+			json: `{"key": null}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").
+					IsURL().
+					WithHosts().
+					WithSchemas().
+					That(func(u *url.URL) error { return nil })
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is string`,
 			},
 		},
 	}

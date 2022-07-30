@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/stretchr/testify v1.7.0
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb
 	golang.org/x/net v0.0.0-20211020060615-d418f374d309 // indirect

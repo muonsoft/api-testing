@@ -7,6 +7,10 @@
   "stringNode": "stringValue",
   "integerNode": 123,
   "floatNode": 123.123,
+  "uuid": "23e98a0c-26c8-410f-978f-d1d67228af87",
+  "nilUUID": "00000000-0000-0000-0000-000000000000",
+  "email": "user@example.com",
+  "url": "https://example.com",
   "arrayNode": [
     "arrayValue"
   ],
