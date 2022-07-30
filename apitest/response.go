@@ -1,8 +1,11 @@
 package apitest
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/muonsoft/api-testing/assertjson"
@@ -156,4 +159,39 @@ func (r *AssertResponse) HasJSON(jsonAssert assertjson.JSONAssertFunc) {
 func (r *AssertResponse) HasXML(xmlAssert assertxml.XMLAssertFunc) {
 	r.t.Helper()
 	assertxml.Has(r.t, r.recorder.Body.Bytes(), xmlAssert)
+}
+
+// Print prints response headers and body to console. Use it for debug purposes.
+func (r *AssertResponse) Print() {
+	r.t.Helper()
+	headers := r.printHeaders()
+	r.t.Log(headers + r.recorder.Body.String())
+}
+
+// PrintJSON prints response headers and indented JSON body to console. Use it for debug purposes.
+func (r *AssertResponse) PrintJSON() {
+	r.t.Helper()
+	headers := r.printHeaders()
+	var body interface{}
+	err := json.Unmarshal(r.recorder.Body.Bytes(), &body)
+	if err != nil {
+		r.t.Log(headers)
+		r.t.Error("invalid JSON:", err)
+		return
+	}
+	printableJSON, _ := json.MarshalIndent(body, "", "\t")
+	r.t.Log(headers + string(printableJSON))
+}
+
+func (r *AssertResponse) printHeaders() string {
+	r.t.Helper()
+	s := &strings.Builder{}
+	s.WriteString("\n")
+	// nolint:bodyclose
+	fmt.Fprintln(s, r.recorder.Result().Proto, r.recorder.Result().Status)
+	for name, values := range r.recorder.Header() {
+		fmt.Fprintf(s, "%s: %s\n", name, strings.Join(values, "; "))
+	}
+
+	return s.String()
 }

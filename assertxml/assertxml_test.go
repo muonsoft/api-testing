@@ -1,9 +1,13 @@
-package assertxml
+package assertxml_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/muonsoft/api-testing/assertxml"
+)
 
 func TestFileHas(t *testing.T) {
-	FileHas(t, "./../test/testdata/object.xml", func(xml *AssertXML) {
+	assertxml.FileHas(t, "./../test/testdata/object.xml", func(xml *assertxml.AssertXML) {
 		// common assertions
 		xml.Node("/root/stringNode").Exists()
 		xml.Node("/root/notExistingNode").DoesNotExist()
