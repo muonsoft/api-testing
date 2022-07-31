@@ -206,6 +206,22 @@ func (a *ObjectAssertion) WithUniqueElements(msgAndArgs ...interface{}) *ObjectA
 	return a
 }
 
+// PropertiesCount returns array underlying object properties count.
+func (a *ObjectAssertion) PropertiesCount() int {
+	if a == nil {
+		return 0
+	}
+	a.t.Helper()
+
+	return len(a.value)
+}
+
+// ObjectPropertiesCount asserts that JSON node is an object and return its properties count.
+// It is an alias for IsObject().PropertiesCount().
+func (node *AssertNode) ObjectPropertiesCount() int {
+	return node.IsObject().PropertiesCount()
+}
+
 func quoteAll(s []string) []string {
 	ss := make([]string, len(s))
 	for i, v := range s {

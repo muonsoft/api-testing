@@ -58,6 +58,8 @@ import (
     "net/http"
     "net/http/httptest"
     "testing"
+
+    "github.com/gofrs/uuid"
     "github.com/muonsoft/api-testing/assertjson"
     "github.com/stretchr/testify/assert"
 )
@@ -128,6 +130,7 @@ func TestYourAPI(t *testing.T) {
         // string values assertions
         json.Node("/uuid").IsString().WithUUID()
         json.Node("/uuid").IsUUID().NotNil().Version(4).Variant(1)
+        json.Node("/uuid").IsUUID().EqualTo(uuid.FromStringOrNil("23e98a0c-26c8-410f-978f-d1d67228af87"))
         json.Node("/nilUUID").IsUUID().Nil()
         json.Node("/email").IsEmail()
         json.Node("/email").IsHTML5Email()
@@ -177,8 +180,13 @@ func TestYourAPI(t *testing.T) {
         assert.Equal(t, 123.0, json.Node("/integerNode").Float())
         assert.Equal(t, 123.123, json.Node("/floatNode").Float())
         assert.Equal(t, 123, json.Node("/integerNode").Integer())
+        assert.Equal(t, 1, json.Node("/arrayNode").IsArray().Length())
+        assert.Equal(t, 1, json.Node("/arrayNode").ArrayLength())
+        assert.Equal(t, 1, json.Node("/objectNode").IsObject().PropertiesCount())
+        assert.Equal(t, 1, json.Node("/objectNode").ObjectPropertiesCount())
         assert.JSONEq(t, `{"objectKey": "objectValue"}`, string(json.Node("/objectNode").JSON()))
         assert.Equal(t, "23e98a0c-26c8-410f-978f-d1d67228af87", json.Node("/uuid").IsUUID().Value().String())
+        assert.Equal(t, "23e98a0c-26c8-410f-978f-d1d67228af87", json.Node("/uuid").UUID().String())
     })
 }
 ```

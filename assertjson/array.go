@@ -203,6 +203,22 @@ func (a *ArrayAssertion) WithUniqueElements(msgAndArgs ...interface{}) *ArrayAss
 	return a
 }
 
+// Length returns array underlying array length.
+func (a *ArrayAssertion) Length() int {
+	if a == nil {
+		return 0
+	}
+	a.t.Helper()
+
+	return len(a.value)
+}
+
+// ArrayLength asserts that JSON node is array and return its length.
+// It is an alias for IsArray().Length().
+func (node *AssertNode) ArrayLength() int {
+	return node.IsArray().Length()
+}
+
 func intsToStrings(ints []int) []string {
 	s := make([]string, len(ints))
 	for i, v := range ints {

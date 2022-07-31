@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/gofrs/uuid"
 	"github.com/muonsoft/api-testing/assertjson"
 	"github.com/muonsoft/api-testing/internal/mock"
 	"github.com/stretchr/testify/assert"
@@ -91,6 +92,7 @@ func TestFileHas(t *testing.T) {
 		// string values assertions
 		json.Node("/uuid").IsString().WithUUID()
 		json.Node("/uuid").IsUUID().NotNil().Version(4).Variant(1)
+		json.Node("/uuid").IsUUID().EqualTo(uuid.FromStringOrNil("23e98a0c-26c8-410f-978f-d1d67228af87"))
 		json.Node("/nilUUID").IsUUID().Nil()
 		json.Node("/email").IsEmail()
 		json.Node("/email").IsHTML5Email()
@@ -142,8 +144,13 @@ func TestFileHas(t *testing.T) {
 		assert.Equal(t, 123.0, json.Node("/integerNode").Float())
 		assert.Equal(t, 123.123, json.Node("/floatNode").Float())
 		assert.Equal(t, 123, json.Node("/integerNode").Integer())
+		assert.Equal(t, 1, json.Node("/arrayNode").IsArray().Length())
+		assert.Equal(t, 1, json.Node("/arrayNode").ArrayLength())
+		assert.Equal(t, 1, json.Node("/objectNode").IsObject().PropertiesCount())
+		assert.Equal(t, 1, json.Node("/objectNode").ObjectPropertiesCount())
 		assert.JSONEq(t, `{"objectKey": "objectValue"}`, string(json.Node("/objectNode").JSON()))
 		assert.Equal(t, "23e98a0c-26c8-410f-978f-d1d67228af87", json.Node("/uuid").IsUUID().Value().String())
+		assert.Equal(t, "23e98a0c-26c8-410f-978f-d1d67228af87", json.Node("/uuid").UUID().String())
 	})
 }
 
@@ -1041,7 +1048,8 @@ func TestHas(t *testing.T) {
 					WithLengthGreaterThanOrEqual(0).
 					WithLengthLessThan(0).
 					WithLengthLessThanOrEqual(0).
-					WithUniqueElements()
+					WithUniqueElements().
+					Length()
 			},
 			wantMessages: []string{
 				`failed asserting that JSON node "/key" is array`,
@@ -1194,7 +1202,8 @@ func TestHas(t *testing.T) {
 					WithPropertiesCountGreaterThanOrEqual(0).
 					WithPropertiesCountLessThan(0).
 					WithPropertiesCountLessThanOrEqual(0).
-					WithUniqueElements()
+					WithUniqueElements().
+					PropertiesCount()
 			},
 			wantMessages: []string{
 				`failed asserting that JSON node "/key" is object`,
@@ -1286,10 +1295,34 @@ func TestHas(t *testing.T) {
 			},
 		},
 		{
+			name: "JSON node is UUID equal to",
+			json: `{"key": "bf0d10a1-d74c-436a-9db1-77c23b5e464f"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsUUID().EqualTo(uuid.FromStringOrNil("bf0d10a1-d74c-436a-9db1-77c23b5e464f"))
+			},
+		},
+		{
+			name: "JSON node is UUID equal to fails",
+			json: `{"key": "bf0d10a1-d74c-436a-9db1-77c23b5e464f"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsUUID().EqualTo(uuid.FromStringOrNil("01fb115c-0fdc-4072-b5ae-c517689d670c"))
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is UUID equal to "01fb115c-0fdc-4072-b5ae-c517689d670c", actual is "bf0d10a1-d74c-436a-9db1-77c23b5e464f"`,
+			},
+		},
+		{
 			name: "JSON node is UUID fails once for a chain",
 			json: `{"key": null}`,
 			assert: func(json *assertjson.AssertJSON) {
-				json.Node("/key").IsUUID().Nil().NotNil().Version(0).Variant(0).Value()
+				json.Node("/key").
+					IsUUID().
+					Nil().
+					NotNil().
+					Version(0).
+					Variant(0).
+					EqualTo(uuid.Nil).
+					Value()
 			},
 			wantMessages: []string{
 				`failed asserting that JSON node "/key" is string`,

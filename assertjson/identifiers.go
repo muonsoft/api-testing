@@ -130,6 +130,28 @@ func (a *UUIDAssertion) Variant(variant byte, msgAndArgs ...interface{}) *UUIDAs
 	return a
 }
 
+// EqualTo asserts that the JSON node is UUID equals to the given value.
+func (a *UUIDAssertion) EqualTo(expected uuid.UUID, msgAndArgs ...interface{}) *UUIDAssertion {
+	if a == nil {
+		return nil
+	}
+	a.t.Helper()
+	if a.value != expected {
+		assert.Fail(
+			a.t,
+			fmt.Sprintf(
+				`failed asserting that JSON node "%s" is UUID equal to "%s", actual is "%s"`,
+				a.path,
+				expected,
+				a.value,
+			),
+			msgAndArgs...,
+		)
+	}
+
+	return a
+}
+
 // Value returns JSON node value as UUID. If string is not a valid UUID it returns nil UUID.
 func (a *UUIDAssertion) Value() uuid.UUID {
 	if a == nil {
@@ -138,4 +160,10 @@ func (a *UUIDAssertion) Value() uuid.UUID {
 	a.t.Helper()
 
 	return a.value
+}
+
+// UUID asserts that the JSON node is UUID and returns its value. If value is not a valid UUID,
+// then it will return nil UUID. It is an alias for IsUUID().Value().
+func (node *AssertNode) UUID() uuid.UUID {
+	return node.IsUUID().Value()
 }
