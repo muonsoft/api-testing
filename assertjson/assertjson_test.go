@@ -105,6 +105,9 @@ func TestFileHas(t *testing.T) {
 		json.Node("/arrayNode").IsArray().WithLengthLessThan(2)
 		json.Node("/arrayNode").IsArray().WithLengthLessThanOrEqual(1)
 		json.Node("/arrayNode").IsArray().WithUniqueElements()
+		json.Node("/arrayNode").ForEach(func(node *assertjson.AssertNode) {
+			node.IsString().EqualTo("arrayValue")
+		})
 
 		// object assertions
 		json.Node("/objectNode").IsObjectWithPropertiesCount(1)
@@ -115,6 +118,9 @@ func TestFileHas(t *testing.T) {
 		json.Node("/objectNode").IsObject().WithPropertiesCountLessThan(2)
 		json.Node("/objectNode").IsObject().WithPropertiesCountLessThanOrEqual(1)
 		json.Node("/objectNode").IsObject().WithUniqueElements()
+		json.Node("/objectNode").ForEach(func(node *assertjson.AssertNode) {
+			node.IsString().EqualTo("objectValue")
+		})
 
 		// json pointer expression
 		json.Node("/complexNode/items/1/key").IsString().EqualTo("value")
@@ -163,6 +169,58 @@ func TestHas(t *testing.T) {
 			},
 			wantMessages: []string{
 				`failed to find JSON node "/key": Object has no key 'key'`,
+			},
+		},
+		{
+			name: "JSON each array node equal to string",
+			json: `{"array": ["value", "value", "value"]}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/array").ForEach(func(node *assertjson.AssertNode) {
+					node.IsString().EqualTo("value")
+				})
+			},
+		},
+		{
+			name: "JSON each array node equal to string fails",
+			json: `{"array": ["value", "v", "value"]}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/array").ForEach(func(node *assertjson.AssertNode) {
+					node.IsString().EqualTo("value")
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/array/1" equal to "value", actual is "v"`,
+			},
+		},
+		{
+			name: "JSON each object node equal to string",
+			json: `{"object": {"a": "value", "b": "value", "c": "value"}}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/object").ForEach(func(node *assertjson.AssertNode) {
+					node.IsString().EqualTo("value")
+				})
+			},
+		},
+		{
+			name: "JSON each object node equal to string fails",
+			json: `{"object": {"a": "value", "b": "v", "c": "value"}}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/object").ForEach(func(node *assertjson.AssertNode) {
+					node.IsString().EqualTo("value")
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/object/b" equal to "value", actual is "v"`,
+			},
+		},
+		{
+			name: "JSON each node on not iterable",
+			json: `{"key": "value"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").ForEach(func(node *assertjson.AssertNode) {})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is iterable (array or object)`,
 			},
 		},
 		{
@@ -302,7 +360,7 @@ func TestHas(t *testing.T) {
 			},
 			wantMessages: []string{
 				"Not equal",
-				`failed at json node "/key"`,
+				`failed at JSON node "/key"`,
 			},
 		},
 		{

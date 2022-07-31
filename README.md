@@ -81,16 +81,10 @@ func TestYourAPI(t *testing.T) {
 
         // string assertions
         json.Node("/stringNode").IsString()
-        json.Node("/stringNode").EqualToTheString("stringValue")
-        json.Node("/stringNode").AssertString(func(t testing.TB, value string) {
-            assert.Equal(t, "stringValue", value)
-        })
         json.Node("/stringNode").Matches("^string.*$")
         json.Node("/stringNode").DoesNotMatch("^notMatch$")
         json.Node("/stringNode").Contains("string")
         json.Node("/stringNode").DoesNotContain("notContain")
-        json.Node("/stringNode").IsStringWithLength(11)
-        json.Node("/stringNode").IsStringWithLengthInRange(11, 11)
 
         // fluent string assertions
         json.Node("/stringNode").IsString()
@@ -121,12 +115,6 @@ func TestYourAPI(t *testing.T) {
         json.Node("/integerNode").IsInteger().GreaterThanOrEqual(123)
         json.Node("/integerNode").IsInteger().LessThan(124)
         json.Node("/integerNode").IsInteger().LessThanOrEqual(123)
-        json.Node("/integerNode").EqualToTheInteger(123)
-        json.Node("/integerNode").IsNumberInRange(122, 124)
-        json.Node("/integerNode").IsNumberGreaterThan(122)
-        json.Node("/integerNode").IsNumberGreaterThanOrEqual(123)
-        json.Node("/integerNode").IsNumberLessThan(124)
-        json.Node("/integerNode").IsNumberLessThanOrEqual(123)
         json.Node("/floatNode").IsFloat()
         json.Node("/floatNode").IsNumber()
         json.Node("/floatNode").IsNumber().EqualTo(123.123)
@@ -136,22 +124,6 @@ func TestYourAPI(t *testing.T) {
         json.Node("/floatNode").IsNumber().LessThan(124)
         json.Node("/floatNode").IsNumber().LessThanOrEqual(123.123)
         json.Node("/floatNode").IsNumber().GreaterThanOrEqual(122).LessThanOrEqual(124)
-        json.Node("/floatNode").EqualToTheFloat(123.123)
-        json.Node("/floatNode").IsNumberInRange(122, 124)
-        json.Node("/floatNode").IsNumberGreaterThan(122)
-        json.Node("/floatNode").IsNumberGreaterThanOrEqual(123.123)
-        json.Node("/floatNode").IsNumberLessThan(124)
-        json.Node("/floatNode").IsNumberLessThanOrEqual(123.123)
-
-        // array assertions
-        json.Node("/arrayNode").IsArrayWithElementsCount(1)
-        json.Node("/arrayNode").IsArray()
-        json.Node("/arrayNode").IsArray().WithLength(1)
-        json.Node("/arrayNode").IsArray().WithLengthGreaterThan(0)
-        json.Node("/arrayNode").IsArray().WithLengthGreaterThanOrEqual(1)
-        json.Node("/arrayNode").IsArray().WithLengthLessThan(2)
-        json.Node("/arrayNode").IsArray().WithLengthLessThanOrEqual(1)
-        json.Node("/arrayNode").IsArray().WithUniqueElements()
 
         // string values assertions
         json.Node("/uuid").IsString().WithUUID()
@@ -161,8 +133,19 @@ func TestYourAPI(t *testing.T) {
         json.Node("/email").IsHTML5Email()
         json.Node("/url").IsURL().WithSchemas("https").WithHosts("example.com")
 
+        // array assertions
+        json.Node("/arrayNode").IsArray()
+        json.Node("/arrayNode").IsArray().WithLength(1)
+        json.Node("/arrayNode").IsArray().WithLengthGreaterThan(0)
+        json.Node("/arrayNode").IsArray().WithLengthGreaterThanOrEqual(1)
+        json.Node("/arrayNode").IsArray().WithLengthLessThan(2)
+        json.Node("/arrayNode").IsArray().WithLengthLessThanOrEqual(1)
+        json.Node("/arrayNode").IsArray().WithUniqueElements()
+        json.Node("/arrayNode").ForEach(func(node *assertjson.AssertNode) {
+            node.IsString().EqualTo("arrayValue")
+        })
+
         // object assertions
-        json.Node("/objectNode").IsObjectWithPropertiesCount(1)
         json.Node("/objectNode").IsObject()
         json.Node("/objectNode").IsObject().WithPropertiesCount(1)
         json.Node("/objectNode").IsObject().WithPropertiesCountGreaterThan(0)
@@ -170,6 +153,9 @@ func TestYourAPI(t *testing.T) {
         json.Node("/objectNode").IsObject().WithPropertiesCountLessThan(2)
         json.Node("/objectNode").IsObject().WithPropertiesCountLessThanOrEqual(1)
         json.Node("/objectNode").IsObject().WithUniqueElements()
+        json.Node("/objectNode").ForEach(func(node *assertjson.AssertNode) {
+            node.IsString().EqualTo("objectValue")
+        })
 
         // json pointer expression
         json.Node("/complexNode/items/1/key").IsString().EqualTo("value")
