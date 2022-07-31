@@ -178,6 +178,7 @@ func TestYourAPI(t *testing.T) {
         assert.Equal(t, 123.123, json.Node("/floatNode").Float())
         assert.Equal(t, 123, json.Node("/integerNode").Integer())
         assert.JSONEq(t, `{"objectKey": "objectValue"}`, string(json.Node("/objectNode").JSON()))
+        assert.Equal(t, "23e98a0c-26c8-410f-978f-d1d67228af87", json.Node("/uuid").IsUUID().Value().String())
     })
 }
 ```
