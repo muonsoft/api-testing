@@ -14,13 +14,13 @@ import (
 // with an "@" symbol in, and a "." in the second host part of the email address.
 func (node *AssertNode) IsEmail(msgAndArgs ...interface{}) {
 	node.t.Helper()
-	node.IsString().IsEmail(msgAndArgs...)
+	node.IsString().WithEmail(msgAndArgs...)
 }
 
-// IsEmail asserts that the JSON node has a string value with email.
+// WithEmail asserts that the JSON node has a string value with email.
 // Validation is based on simplified pattern. It allows all values
 // with an "@" symbol in, and a "." in the second host part of the email address.
-func (a *StringAssertion) IsEmail(msgAndArgs ...interface{}) *StringAssertion {
+func (a *StringAssertion) WithEmail(msgAndArgs ...interface{}) *StringAssertion {
 	if a == nil {
 		return nil
 	}
@@ -44,12 +44,12 @@ func (a *StringAssertion) IsEmail(msgAndArgs ...interface{}) *StringAssertion {
 // pattern for HTML5 (see https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address).
 func (node *AssertNode) IsHTML5Email(msgAndArgs ...interface{}) {
 	node.t.Helper()
-	node.IsString().IsHTML5Email(msgAndArgs...)
+	node.IsString().WithHTML5Email(msgAndArgs...)
 }
 
-// IsHTML5Email asserts that the JSON node has a string value with email. Validation is based on
+// WithHTML5Email asserts that the JSON node has a string value with email. Validation is based on
 // pattern for HTML5 (see https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address).
-func (a *StringAssertion) IsHTML5Email(msgAndArgs ...interface{}) *StringAssertion {
+func (a *StringAssertion) WithHTML5Email(msgAndArgs ...interface{}) *StringAssertion {
 	if a == nil {
 		return nil
 	}
@@ -72,11 +72,11 @@ func (a *StringAssertion) IsHTML5Email(msgAndArgs ...interface{}) *StringAsserti
 // IsURL asserts that the JSON node has a string value with URL.
 func (node *AssertNode) IsURL(msgAndArgs ...interface{}) *URLAssertion {
 	node.t.Helper()
-	return node.IsString().IsURL(msgAndArgs...)
+	return node.IsString().WithURL(msgAndArgs...)
 }
 
-// IsURL asserts that the JSON node has a string value with URL.
-func (a *StringAssertion) IsURL(msgAndArgs ...interface{}) *URLAssertion {
+// WithURL asserts that the JSON node has a string value with URL.
+func (a *StringAssertion) WithURL(msgAndArgs ...interface{}) *URLAssertion {
 	if a == nil {
 		return nil
 	}

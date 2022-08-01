@@ -892,8 +892,8 @@ func TestHas(t *testing.T) {
 					WithLengthGreaterThanOrEqual(0).
 					WithLengthLessThan(0).
 					WithLengthLessThanOrEqual(0).
-					IsEmail().
-					IsHTML5Email().
+					WithEmail().
+					WithHTML5Email().
 					That(func(s string) error { return nil }).
 					Assert(func(tb testing.TB, value string) { tb.Helper() })
 			},
