@@ -141,6 +141,29 @@ func (a *NumberAssertion) EqualTo(expected float64, msgAndArgs ...interface{}) *
 	return nil
 }
 
+// NotEqualTo asserts that the JSON node has a numeric value not equals to the given value.
+func (a *NumberAssertion) NotEqualTo(expected float64, msgAndArgs ...interface{}) *NumberAssertion {
+	if a == nil {
+		return nil
+	}
+	a.t.Helper()
+
+	if a.value == expected {
+		assert.Fail(
+			a.t,
+			fmt.Sprintf(
+				`failed asserting that JSON node "%s" not equal to %f, actual is %f`,
+				a.path,
+				expected,
+				a.value,
+			),
+			msgAndArgs...,
+		)
+	}
+
+	return nil
+}
+
 // EqualToWithDelta asserts that the JSON node has a numeric value equals to the given value with delta.
 func (a *NumberAssertion) EqualToWithDelta(expected, delta float64, msgAndArgs ...interface{}) *NumberAssertion {
 	if a == nil {
@@ -277,6 +300,29 @@ func (a *IntegerAssertion) EqualTo(expected int, msgAndArgs ...interface{}) *Int
 			a.t,
 			fmt.Sprintf(
 				`failed asserting that JSON node "%s" equal to %d, actual is %d`,
+				a.path,
+				expected,
+				a.value,
+			),
+			msgAndArgs...,
+		)
+	}
+
+	return nil
+}
+
+// NotEqualTo asserts that the JSON node has an integer value not equals to the given value.
+func (a *IntegerAssertion) NotEqualTo(expected int, msgAndArgs ...interface{}) *IntegerAssertion {
+	if a == nil {
+		return nil
+	}
+	a.t.Helper()
+
+	if a.value == expected {
+		assert.Fail(
+			a.t,
+			fmt.Sprintf(
+				`failed asserting that JSON node "%s" not equal to %d, actual is %d`,
 				a.path,
 				expected,
 				a.value,

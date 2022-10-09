@@ -152,6 +152,28 @@ func (a *UUIDAssertion) EqualTo(expected uuid.UUID, msgAndArgs ...interface{}) *
 	return a
 }
 
+// NotEqualTo asserts that the JSON node is UUID not equals to the given value.
+func (a *UUIDAssertion) NotEqualTo(expected uuid.UUID, msgAndArgs ...interface{}) *UUIDAssertion {
+	if a == nil {
+		return nil
+	}
+	a.t.Helper()
+	if a.value == expected {
+		assert.Fail(
+			a.t,
+			fmt.Sprintf(
+				`failed asserting that JSON node "%s" is UUID not equal to "%s", actual is "%s"`,
+				a.path,
+				expected,
+				a.value,
+			),
+			msgAndArgs...,
+		)
+	}
+
+	return a
+}
+
 // Value returns JSON node value as UUID. If string is not a valid UUID it returns nil UUID.
 func (a *UUIDAssertion) Value() uuid.UUID {
 	if a == nil {

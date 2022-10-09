@@ -405,6 +405,23 @@ func TestHas(t *testing.T) {
 			},
 		},
 		{
+			name: "JSON node is number not equal to",
+			json: `{"key": 123.123}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsNumber().NotEqualTo(321.123)
+			},
+		},
+		{
+			name: "JSON node is number not equal to fails",
+			json: `{"key": 123.123}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsNumber().NotEqualTo(123.123)
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" not equal to 123.123000, actual is 123.123000`,
+			},
+		},
+		{
 			name: "JSON node is number equal to with delta",
 			json: `{"key": 123.123}`,
 			assert: func(json *assertjson.AssertJSON) {
@@ -497,6 +514,7 @@ func TestHas(t *testing.T) {
 					IsNumber().
 					EqualTo(0).
 					EqualToWithDelta(0, 0).
+					NotEqualTo(0).
 					GreaterThan(0).
 					GreaterThanOrEqual(0).
 					LessThan(0).
@@ -548,6 +566,23 @@ func TestHas(t *testing.T) {
 			},
 			wantMessages: []string{
 				`failed asserting that JSON node "/key" equal to 321, actual is 123`,
+			},
+		},
+		{
+			name: "JSON node is integer not equal to",
+			json: `{"key": 123}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsInteger().NotEqualTo(321)
+			},
+		},
+		{
+			name: "JSON node is integer not equal to fails",
+			json: `{"key": 123}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsInteger().NotEqualTo(123)
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" not equal to 123, actual is 123`,
 			},
 		},
 		{
@@ -625,6 +660,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").
 					IsInteger().
 					EqualTo(0).
+					NotEqualTo(0).
 					GreaterThan(0).
 					GreaterThanOrEqual(0).
 					LessThan(0).
@@ -666,6 +702,40 @@ func TestHas(t *testing.T) {
 			},
 			wantMessages: []string{
 				`failed asserting that JSON node "/key" equal to "string", actual is "value"`,
+			},
+		},
+		{
+			name: "JSON node is string not equal to",
+			json: `{"key": "value"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().NotEqualTo("string")
+			},
+		},
+		{
+			name: "JSON node is string not equal to fails",
+			json: `{"key": "value"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().NotEqualTo("value")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" not equal to "value", actual is "value"`,
+			},
+		},
+		{
+			name: "JSON node is string equal to one of",
+			json: `{"key": "value"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().EqualToOneOf("value")
+			},
+		},
+		{
+			name: "JSON node is string equal to one of fails",
+			json: `{"key": "value"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().EqualToOneOf("foo", "bar")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" equal to one of values ("foo", "bar"), actual is "value"`,
 			},
 		},
 		{
@@ -883,6 +953,8 @@ func TestHas(t *testing.T) {
 				json.Node("/key").
 					IsString().
 					EqualTo("").
+					NotEqualTo("").
+					EqualToOneOf("").
 					Matches(".*").
 					NotMatches(".*").
 					Contains("").
@@ -1312,6 +1384,23 @@ func TestHas(t *testing.T) {
 			},
 		},
 		{
+			name: "JSON node is UUID not equal to",
+			json: `{"key": "bf0d10a1-d74c-436a-9db1-77c23b5e464f"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsUUID().NotEqualTo(uuid.FromStringOrNil("01fb115c-0fdc-4072-b5ae-c517689d670c"))
+			},
+		},
+		{
+			name: "JSON node is UUID not equal to fails",
+			json: `{"key": "bf0d10a1-d74c-436a-9db1-77c23b5e464f"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsUUID().NotEqualTo(uuid.FromStringOrNil("bf0d10a1-d74c-436a-9db1-77c23b5e464f"))
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is UUID not equal to "bf0d10a1-d74c-436a-9db1-77c23b5e464f", actual is "bf0d10a1-d74c-436a-9db1-77c23b5e464f"`,
+			},
+		},
+		{
 			name: "JSON node is UUID fails once for a chain",
 			json: `{"key": null}`,
 			assert: func(json *assertjson.AssertJSON) {
@@ -1322,6 +1411,7 @@ func TestHas(t *testing.T) {
 					Version(0).
 					Variant(0).
 					EqualTo(uuid.Nil).
+					NotEqualTo(uuid.FromStringOrNil("bf0d10a1-d74c-436a-9db1-77c23b5e464f")).
 					Value()
 			},
 			wantMessages: []string{
