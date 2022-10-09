@@ -3,6 +3,7 @@ package assertjson
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"unicode/utf8"
@@ -103,6 +104,50 @@ func (a *StringAssertion) EqualTo(expectedValue string, msgAndArgs ...interface{
 				a.value,
 			),
 			msgAndArgs...,
+		)
+	}
+
+	return a
+}
+
+// NotEqualTo asserts that the JSON node has a string value not equals to the given value.
+func (a *StringAssertion) NotEqualTo(expectedValue string, msgAndArgs ...interface{}) *StringAssertion {
+	if a == nil {
+		return nil
+	}
+	a.t.Helper()
+	if a.value == expectedValue {
+		assert.Fail(
+			a.t,
+			fmt.Sprintf(
+				`failed asserting that JSON node "%s" not equal to "%s", actual is "%s"`,
+				a.path,
+				expectedValue,
+				a.value,
+			),
+			msgAndArgs...,
+		)
+	}
+
+	return a
+}
+
+// EqualToOneOf asserts that the JSON node has a string value equals to one of the given values.
+func (a *StringAssertion) EqualToOneOf(expectedValues ...string) *StringAssertion {
+	if a == nil {
+		return nil
+	}
+	a.t.Helper()
+
+	if !isOneOf(a.value, expectedValues) {
+		assert.Fail(
+			a.t,
+			fmt.Sprintf(
+				`failed asserting that JSON node "%s" equal to one of values (%s), actual is "%s"`,
+				a.path,
+				formatStrings(expectedValues),
+				a.value,
+			),
 		)
 	}
 
@@ -346,7 +391,7 @@ func (a *StringAssertion) Assert(assertFunc func(t testing.TB, value string)) *S
 		return nil
 	}
 	a.t.Helper()
-	// nolint: forcetypeassert
+	//nolint: forcetypeassert
 	assertFunc(a.t.(testing.TB), a.value)
 
 	return a
@@ -362,4 +407,27 @@ func matchRegexp(rx interface{}, s string) bool {
 	}
 
 	return r.FindStringIndex(s) != nil
+}
+
+func isOneOf(s string, ss []string) bool {
+	for _, s2 := range ss {
+		if s == s2 {
+			return true
+		}
+	}
+
+	return false
+}
+
+func formatStrings(ss []string) string {
+	var b strings.Builder
+
+	for i, s := range ss {
+		if i > 0 {
+			b.WriteString(", ")
+		}
+		b.WriteString(strconv.Quote(s))
+	}
+
+	return b.String()
 }

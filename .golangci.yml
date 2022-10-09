@@ -5,7 +5,6 @@ linters:
     - bodyclose
     - contextcheck
     - cyclop
-    - deadcode
     - depguard
     - dogsled
     - durationcheck
@@ -47,7 +46,6 @@ linters:
     - revive
     - rowserrcheck
     - sqlclosecheck
-    - structcheck
     - stylecheck
     - tenv
     - testpackage
@@ -57,7 +55,6 @@ linters:
     - unconvert
     - unparam
     - unused
-    - varcheck
     - whitespace
 
 issues:

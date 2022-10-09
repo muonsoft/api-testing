@@ -1,29 +1,30 @@
 // Package assertxml provides methods for testing XML values. Selecting XML values provided by XML Path Syntax.
 //
 // Example usage
-//    import (
-//        "net/http"
-//        "net/http/httptest"
-//        "testing"
-//        "github.com/muonsoft/api-testing/assertxml"
-//     )
 //
-//     func TestYourAPI(t testing.TB) {
-//        recorder := httptest.NewRecorder()
-//        handler := createHTTPHandler()
+//	import (
+//	    "net/http"
+//	    "net/http/httptest"
+//	    "testing"
+//	    "github.com/muonsoft/api-testing/assertxml"
+//	 )
 //
-//        request, _ := http.NewRequest("GET", "/content", nil)
-//        handler.ServeHTTP(recorder, request)
+//	 func TestYourAPI(t testing.TB) {
+//	    recorder := httptest.NewRecorder()
+//	    handler := createHTTPHandler()
 //
-//        assertxml.Has(t, recorder.Body.Bytes(), func(xml *AssertXML) {
-//            // common assertions
-//            xml.Node("/root/stringNode").Exists()
-//            xml.Node("/root/notExistingNode").DoesNotExist()
+//	    request, _ := http.NewRequest("GET", "/content", nil)
+//	    handler.ServeHTTP(recorder, request)
 //
-//            // string assertions
-//            xml.Node("/root/stringNode").EqualToTheString("stringValue")
-//        })
-//     }
+//	    assertxml.Has(t, recorder.Body.Bytes(), func(xml *AssertXML) {
+//	        // common assertions
+//	        xml.Node("/root/stringNode").Exists()
+//	        xml.Node("/root/notExistingNode").DoesNotExist()
+//
+//	        // string assertions
+//	        xml.Node("/root/stringNode").EqualToTheString("stringValue")
+//	    })
+//	 }
 package assertxml
 
 import (

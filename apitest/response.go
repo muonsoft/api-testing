@@ -201,7 +201,7 @@ func (r *AssertResponse) formatHeaders() string {
 	r.t.Helper()
 	s := &strings.Builder{}
 	s.WriteString("\n")
-	// nolint:bodyclose
+	//nolint:bodyclose
 	fmt.Fprintln(s, r.recorder.Result().Proto, r.recorder.Result().Status)
 	for name, values := range r.recorder.Header() {
 		fmt.Fprintf(s, "%s: %s\n", name, strings.Join(values, "; "))
