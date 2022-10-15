@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/gofrs/uuid"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/muonsoft/api-testing/assertjson"
 	"github.com/muonsoft/api-testing/internal/mock"
 	"github.com/stretchr/testify/assert"
@@ -1548,6 +1549,261 @@ func TestHas(t *testing.T) {
 				`failed asserting that JSON node "/key" is string`,
 			},
 		},
+		{
+			name: "JSON node is JSON",
+			json: `{"key": "{\"key\": \"value\"}"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().WithJSON(func(json *assertjson.AssertJSON) {
+					json.Node("/key").IsString().EqualTo("value")
+				})
+			},
+		},
+		{
+			name: "JSON node is JSON fails",
+			json: `{"key": "{key}"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().WithJSON(func(json *assertjson.AssertJSON) {
+					json.Node("/key").IsString().EqualTo("value")
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is string with JSON: data has invalid JSON: invalid character 'k' looking for beginning of object key string`,
+			},
+		},
+		{
+			name: "JSON node is JSON: missing node",
+			json: `{"key": "{}"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().WithJSON(func(json *assertjson.AssertJSON) {
+					json.At("/key")
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is string with JSON: failed to find JSON node "/key": Object has no key 'key'`,
+			},
+		},
+		{
+			name: "JSON node is JSON: string assertion failed",
+			json: `{"key": "{\"key\": 123}"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().WithJSON(func(json *assertjson.AssertJSON) {
+					json.Node("/key").IsString()
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" is string`,
+			},
+		},
+		{
+			name: "JSON node is JSON: string equal assertion failed",
+			json: `{"key": "{\"key\": \"value\"}"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().WithJSON(func(json *assertjson.AssertJSON) {
+					json.Node("/key").IsString().EqualTo("expected")
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" equal to "expected", actual is "value"`,
+			},
+		},
+		{
+			name: "JSON node is JSON: URL assertion failed",
+			json: `{"key": "{\"key\": \"http://example.com\"}"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().WithJSON(func(json *assertjson.AssertJSON) {
+					json.Node("/key").IsURL().WithHosts("example.net")
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" is URL with hosts "example.net", actual is "example.com"`,
+			},
+		},
+		{
+			name: "JSON node is JSON: UUID assertion failed",
+			json: `{"key": "{\"key\": \"00000000-0000-0000-0000-000000000000\"}"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().WithJSON(func(json *assertjson.AssertJSON) {
+					json.Node("/key").IsUUID().NotNil()
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" is not nil UUID, actual is "00000000-0000-0000-0000-000000000000"`,
+			},
+		},
+		{
+			name: "JSON node is JSON: JWT assertion failed",
+			json: `{"key": "{\"key\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().WithJSON(func(json *assertjson.AssertJSON) {
+					json.Node("/key").IsJWT(getJWTSecret).Algorithm("HS512")
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" is JWT with algorithm "HS512", actual is "HS256"`,
+			},
+		},
+		{
+			name: "JSON node is JSON: number assertion failed",
+			json: `{"key": "{\"key\": 123}"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().WithJSON(func(json *assertjson.AssertJSON) {
+					json.Node("/key").IsNumber().EqualTo(321)
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" equal to 321.000000, actual is 123.000000`,
+			},
+		},
+		{
+			name: "JSON node is JSON: integer assertion failed",
+			json: `{"key": "{\"key\": 123}"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().WithJSON(func(json *assertjson.AssertJSON) {
+					json.Node("/key").IsInteger().EqualTo(321)
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" equal to 321, actual is 123`,
+			},
+		},
+		{
+			name: "JSON node is JSON: array assertion failed",
+			json: `{"key": "{\"key\": []}"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().WithJSON(func(json *assertjson.AssertJSON) {
+					json.Node("/key").IsArray().WithLength(1)
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" is array with length is 1, actual is 0`,
+			},
+		},
+		{
+			name: "JSON node is JSON: object assertion failed",
+			json: `{"key": "{\"key\": {}}"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().WithJSON(func(json *assertjson.AssertJSON) {
+					json.Node("/key").IsObject().WithPropertiesCount(1)
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" is object with properties count is 1, actual is 0`,
+			},
+		},
+		{
+			name: "JSON node is JSON: for each array assertion failed",
+			json: `{"key": "{\"key\": [\"value\"]}"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().WithJSON(func(json *assertjson.AssertJSON) {
+					json.Node("/key").ForEach(func(node *assertjson.AssertNode) {
+						node.IsString().EqualTo("expected")
+					})
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key/0" equal to "expected", actual is "value"`,
+			},
+		},
+		{
+			name: "JSON node is JSON: for each object assertion failed",
+			json: `{"key": "{\"key\": {\"key\": \"value\"}}"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().WithJSON(func(json *assertjson.AssertJSON) {
+					json.Node("/key").ForEach(func(node *assertjson.AssertNode) {
+						node.IsString().EqualTo("expected")
+					})
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key/key" equal to "expected", actual is "value"`,
+			},
+		},
+		{
+			name: "JSON node is JWT",
+			json: `{"key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsJWT(getJWTSecret)
+			},
+		},
+		{
+			name: "JSON node is JWT fails",
+			json: `{"key": "invalid"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsJWT(getJWTSecret)
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is JWT: token contains an invalid number of segments`,
+			},
+		},
+		{
+			name: "JSON node is JWT fails on invalid signature",
+			json: `{"key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.u5ClmY6KVIUdReH0H2qpG2oyqrb8VTfJ8NzaLVxylEI"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsJWT(getJWTSecret)
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is JWT: signature is invalid`,
+			},
+		},
+		{
+			name: "JSON node is JWT with algorithm",
+			json: `{"key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsJWT(getJWTSecret).Algorithm("HS256")
+			},
+		},
+		{
+			name: "JSON node is JWT with algorithm fails",
+			json: `{"key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsJWT(getJWTSecret).Algorithm("HS512")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is JWT with algorithm "HS512", actual is "HS256"`,
+			},
+		},
+		{
+			name: "JSON node is JWT with header",
+			json: `{"key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsJWT(getJWTSecret).Header(func(json *assertjson.AssertJSON) {
+					json.Node("/alg").IsString().EqualTo("HS256")
+				})
+			},
+		},
+		{
+			name: "JSON node is JWT with header fails",
+			json: `{"key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsJWT(getJWTSecret).Header(func(json *assertjson.AssertJSON) {
+					json.Node("/alg").IsString().EqualTo("HS512")
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is JWT with header: failed asserting that JSON node "/alg" equal to "HS512", actual is "HS256"`,
+			},
+		},
+		{
+			name: "JSON node is JWT with payload",
+			json: `{"key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsJWT(getJWTSecret).Payload(func(json *assertjson.AssertJSON) {
+					json.Node("/name").IsString().EqualTo("John Doe")
+				})
+			},
+		},
+		{
+			name: "JSON node is JWT with payload fails",
+			json: `{"key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsJWT(getJWTSecret).Payload(func(json *assertjson.AssertJSON) {
+					json.Node("/name").IsString().EqualTo("John Smith")
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is JWT with payload: failed asserting that JSON node "/name" equal to "John Smith", actual is "John Doe"`,
+			},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -1580,4 +1836,8 @@ func TestAssertNode_Exists(t *testing.T) {
 			assert.Equal(t, test.want, got)
 		})
 	}
+}
+
+func getJWTSecret(token *jwt.Token) (interface{}, error) {
+	return []byte("your-256-bit-secret"), nil
 }

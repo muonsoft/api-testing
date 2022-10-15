@@ -17,10 +17,9 @@ func (node *AssertNode) IsString(msgAndArgs ...interface{}) *StringAssertion {
 	node.t.Helper()
 	if node.exists() {
 		if s, ok := node.value.(string); ok {
-			return &StringAssertion{t: node.t, path: node.Path(), value: s}
+			return &StringAssertion{t: node.t, message: node.message, path: node.Path(), value: s}
 		}
-		assert.Fail(
-			node.t,
+		node.fail(
 			fmt.Sprintf(`failed asserting that JSON node "%s" is string`, node.Path()),
 			msgAndArgs...,
 		)
@@ -83,9 +82,10 @@ func (node *AssertNode) AssertString(assertFunc func(t testing.TB, value string)
 
 // StringAssertion is used to build a chain of assertions for the string node.
 type StringAssertion struct {
-	t     TestingT
-	path  string
-	value string
+	t       TestingT
+	message string
+	path    string
+	value   string
 }
 
 // EqualTo asserts that the JSON node has a string value equals to the given value.
@@ -95,8 +95,7 @@ func (a *StringAssertion) EqualTo(expectedValue string, msgAndArgs ...interface{
 	}
 	a.t.Helper()
 	if a.value != expectedValue {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				`failed asserting that JSON node "%s" equal to "%s", actual is "%s"`,
 				a.path,
@@ -117,8 +116,7 @@ func (a *StringAssertion) NotEqualTo(expectedValue string, msgAndArgs ...interfa
 	}
 	a.t.Helper()
 	if a.value == expectedValue {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				`failed asserting that JSON node "%s" not equal to "%s", actual is "%s"`,
 				a.path,
@@ -140,8 +138,7 @@ func (a *StringAssertion) EqualToOneOf(expectedValues ...string) *StringAssertio
 	a.t.Helper()
 
 	if !isOneOf(a.value, expectedValues) {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				`failed asserting that JSON node "%s" equal to one of values (%s), actual is "%s"`,
 				a.path,
@@ -161,8 +158,7 @@ func (a *StringAssertion) Matches(regexp interface{}, msgAndArgs ...interface{})
 	}
 	a.t.Helper()
 	if !matchRegexp(regexp, a.value) {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				`failed asserting that JSON node "%s" matches "%v", actual is "%s"`,
 				a.path,
@@ -183,8 +179,7 @@ func (a *StringAssertion) NotMatches(regexp interface{}, msgAndArgs ...interface
 	}
 	a.t.Helper()
 	if matchRegexp(regexp, a.value) {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				`failed asserting that JSON node "%s" not matches "%v", actual is "%s"`,
 				a.path,
@@ -205,8 +200,7 @@ func (a *StringAssertion) Contains(value string, msgAndArgs ...interface{}) *Str
 	}
 	a.t.Helper()
 	if !strings.Contains(a.value, value) {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				`failed asserting that JSON node "%s" contains "%s", actual is "%s"`,
 				a.path,
@@ -227,8 +221,7 @@ func (a *StringAssertion) NotContains(value string, msgAndArgs ...interface{}) *
 	}
 	a.t.Helper()
 	if strings.Contains(a.value, value) {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				`failed asserting that JSON node "%s" not contains "%s", actual is "%s"`,
 				a.path,
@@ -251,8 +244,7 @@ func (a *StringAssertion) WithLength(length int, msgAndArgs ...interface{}) *Str
 
 	actual := utf8.RuneCountInString(a.value)
 	if actual != length {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				`failed asserting that JSON node "%s" is string with length is %d, actual is %d`,
 				a.path,
@@ -275,8 +267,7 @@ func (a *StringAssertion) WithLengthGreaterThan(expected int, msgAndArgs ...inte
 
 	length := utf8.RuneCountInString(a.value)
 	if length <= expected {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				`failed asserting that JSON node "%s" is string with length greater than %d, actual is %d`,
 				a.path,
@@ -300,8 +291,7 @@ func (a *StringAssertion) WithLengthGreaterThanOrEqual(expected int, msgAndArgs 
 
 	length := utf8.RuneCountInString(a.value)
 	if length < expected {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				`failed asserting that JSON node "%s" is string with length greater than or equal to %d, actual is %d`,
 				a.path,
@@ -324,8 +314,7 @@ func (a *StringAssertion) WithLengthLessThan(expected int, msgAndArgs ...interfa
 
 	length := utf8.RuneCountInString(a.value)
 	if length >= expected {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				`failed asserting that JSON node "%s" is string with length less than %d, actual is %d`,
 				a.path,
@@ -349,8 +338,7 @@ func (a *StringAssertion) WithLengthLessThanOrEqual(expected int, msgAndArgs ...
 
 	length := utf8.RuneCountInString(a.value)
 	if length > expected {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				`failed asserting that JSON node "%s" is string with length less than or equal to %d, actual is %d`,
 				a.path,
@@ -371,8 +359,7 @@ func (a *StringAssertion) That(f func(s string) error, msgAndArgs ...interface{}
 	}
 	a.t.Helper()
 	if err := f(a.value); err != nil {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				`failed asserting JSON node "%s": %s`,
 				a.path,
@@ -386,15 +373,23 @@ func (a *StringAssertion) That(f func(s string) error, msgAndArgs ...interface{}
 }
 
 // Assert asserts that the string node has that is satisfied by the user function assertFunc.
-func (a *StringAssertion) Assert(assertFunc func(t testing.TB, value string)) *StringAssertion {
+func (a *StringAssertion) Assert(assertFunc func(tb testing.TB, value string)) *StringAssertion {
 	if a == nil {
 		return nil
 	}
 	a.t.Helper()
-	//nolint: forcetypeassert
+
 	assertFunc(a.t.(testing.TB), a.value)
 
 	return a
+}
+
+func (a *StringAssertion) fail(message string, msgAndArgs ...interface{}) {
+	a.t.Helper()
+	if a.message != "" {
+		message = a.message + ": " + message
+	}
+	assert.Fail(a.t, message, msgAndArgs...)
 }
 
 // matchRegexp return true if a specified regexp matches a string.

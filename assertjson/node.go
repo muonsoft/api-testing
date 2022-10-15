@@ -13,6 +13,7 @@ import (
 type AssertNode struct {
 	t          TestingT
 	err        error
+	message    string
 	pathPrefix string
 	path       string
 	value      interface{}
@@ -44,7 +45,7 @@ func (node *AssertNode) String() string {
 			}
 			return fmt.Sprintf("%f", f)
 		}
-		assert.Fail(node.t, fmt.Sprintf(`JSON node at "%s" cannot be converted into string`, node.Path()))
+		node.fail(fmt.Sprintf(`JSON node at "%s" cannot be converted into string`, node.Path()))
 	}
 
 	return ""
@@ -58,7 +59,7 @@ func (node *AssertNode) Float() float64 {
 		if f, ok := node.value.(float64); ok {
 			return f
 		}
-		assert.Fail(node.t, fmt.Sprintf(`JSON node at "%s" cannot be converted into float`, node.Path()))
+		node.fail(fmt.Sprintf(`JSON node at "%s" cannot be converted into float`, node.Path()))
 	}
 
 	return 0
@@ -73,9 +74,9 @@ func (node *AssertNode) Integer() int {
 			if n, f := math.Modf(f); f == 0 {
 				return int(n)
 			}
-			assert.Fail(node.t, fmt.Sprintf(`JSON node at "%s" is not an integer`, node.Path()))
+			node.fail(fmt.Sprintf(`JSON node at "%s" is not an integer`, node.Path()))
 		} else {
-			assert.Fail(node.t, fmt.Sprintf(`JSON node at "%s" cannot be converted into float`, node.Path()))
+			node.fail(fmt.Sprintf(`JSON node at "%s" cannot be converted into float`, node.Path()))
 		}
 	}
 
@@ -110,6 +111,7 @@ func (node *AssertNode) ForEach(assertNode func(node *AssertNode)) {
 			assertNode(&AssertNode{
 				t:          node.t,
 				err:        node.err,
+				message:    node.message,
 				pathPrefix: node.pathPrefix + node.path,
 				path:       "/" + strconv.Itoa(i),
 				value:      value,
@@ -120,21 +122,25 @@ func (node *AssertNode) ForEach(assertNode func(node *AssertNode)) {
 			assertNode(&AssertNode{
 				t:          node.t,
 				err:        node.err,
+				message:    node.message,
 				pathPrefix: node.pathPrefix + node.path,
 				path:       "/" + key,
 				value:      value,
 			})
 		}
 	} else {
-		assert.Fail(
-			node.t,
+		node.fail(
 			fmt.Sprintf(`failed asserting that JSON node "%s" is iterable (array or object)`, node.Path()),
 		)
 	}
 }
 
-func (node *AssertNode) fail() {
-	assert.Fail(node.t, fmt.Sprintf(`failed at JSON node "%s"`, node.Path()))
+func (node *AssertNode) fail(message string, msgAndArgs ...interface{}) {
+	node.t.Helper()
+	if node.message != "" {
+		message = node.message + ": " + message
+	}
+	assert.Fail(node.t, message, msgAndArgs...)
 }
 
 func (node *AssertNode) exists() bool {

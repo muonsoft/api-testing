@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/xeipuuv/gojsonpointer"
 )
 
@@ -18,9 +19,10 @@ type TestingT interface {
 
 // AssertJSON - main structure that holds parsed JSON.
 type AssertJSON struct {
-	t    TestingT
-	path string
-	data interface{}
+	t       TestingT
+	message string
+	path    string
+	data    interface{}
 }
 
 // JSONAssertFunc - callback function used for asserting JSON nodes.
@@ -31,7 +33,7 @@ func FileHas(t TestingT, filename string, jsonAssert JSONAssertFunc) {
 	t.Helper()
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
-		t.Errorf("failed to read file '%s': %s", filename, err.Error())
+		assert.Fail(t, fmt.Sprintf(`failed to read file "%s": %s`, filename, err.Error()))
 	} else {
 		Has(t, data, jsonAssert)
 	}
@@ -41,12 +43,7 @@ func FileHas(t TestingT, filename string, jsonAssert JSONAssertFunc) {
 func Has(t TestingT, data []byte, jsonAssert JSONAssertFunc) {
 	t.Helper()
 	body := &AssertJSON{t: t}
-	err := json.Unmarshal(data, &body.data)
-	if err != nil {
-		t.Errorf("data has invalid JSON: %s", err.Error())
-	} else {
-		jsonAssert(body)
-	}
+	body.assert(data, jsonAssert)
 }
 
 // Node searches for JSON node by JSON Path Syntax. Returns struct for asserting the node values.
@@ -62,6 +59,7 @@ func (j *AssertJSON) Node(path string) *AssertNode {
 	return &AssertNode{
 		t:          j.t,
 		err:        err,
+		message:    j.message,
 		pathPrefix: j.path,
 		path:       path,
 		value:      value,
@@ -85,7 +83,7 @@ func (j *AssertJSON) At(path string) *AssertJSON {
 		value, _, err = pointer.Get(j.data)
 	}
 	if err != nil {
-		j.t.Errorf(`failed to find JSON node "%s": %v`, path, err)
+		j.fail(fmt.Sprintf(`failed to find JSON node "%s": %v`, path, err))
 	}
 
 	return &AssertJSON{
@@ -100,4 +98,22 @@ func (j *AssertJSON) At(path string) *AssertJSON {
 func (j *AssertJSON) Atf(format string, a ...interface{}) *AssertJSON {
 	j.t.Helper()
 	return j.At(fmt.Sprintf(format, a...))
+}
+
+func (j *AssertJSON) assert(data []byte, jsonAssert JSONAssertFunc) {
+	j.t.Helper()
+	err := json.Unmarshal(data, &j.data)
+	if err != nil {
+		j.fail(fmt.Sprintf("data has invalid JSON: %s", err.Error()))
+	} else {
+		jsonAssert(j)
+	}
+}
+
+func (j *AssertJSON) fail(message string, msgAndArgs ...interface{}) {
+	j.t.Helper()
+	if j.message != "" {
+		message = j.message + ": " + message
+	}
+	assert.Fail(j.t, message, msgAndArgs...)
 }

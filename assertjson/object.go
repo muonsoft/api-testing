@@ -13,10 +13,7 @@ import (
 // Deprecated: use IsObject().WithPropertiesCount() instead.
 func (node *AssertNode) IsObjectWithPropertiesCount(count int, msgAndArgs ...interface{}) {
 	node.t.Helper()
-	if node.exists() {
-		assert.IsType(node.t, map[string]interface{}{}, node.value, msgAndArgs...)
-		assert.Len(node.t, node.value, count, msgAndArgs...)
-	}
+	node.IsObject().WithPropertiesCount(count, msgAndArgs...)
 }
 
 // IsObject asserts that the JSON node is an object.
@@ -25,10 +22,9 @@ func (node *AssertNode) IsObject(msgAndArgs ...interface{}) *ObjectAssertion {
 	node.t.Helper()
 	if node.exists() {
 		if object, ok := node.value.(map[string]interface{}); ok {
-			return &ObjectAssertion{t: node.t, path: node.Path(), value: object}
+			return &ObjectAssertion{t: node.t, message: node.message, path: node.Path(), value: object}
 		}
-		assert.Fail(
-			node.t,
+		node.fail(
 			fmt.Sprintf(`failed asserting that JSON node "%s" is object`, node.Path()),
 			msgAndArgs...,
 		)
@@ -39,9 +35,10 @@ func (node *AssertNode) IsObject(msgAndArgs ...interface{}) *ObjectAssertion {
 
 // ObjectAssertion is used to build a chain of assertions for the object node.
 type ObjectAssertion struct {
-	t     TestingT
-	path  string
-	value map[string]interface{}
+	t       TestingT
+	message string
+	path    string
+	value   map[string]interface{}
 }
 
 // WithPropertiesCount asserts that the JSON node is an object with properties count equal to the given value.
@@ -52,8 +49,7 @@ func (a *ObjectAssertion) WithPropertiesCount(expected int, msgAndArgs ...interf
 	a.t.Helper()
 
 	if len(a.value) != expected {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				`failed asserting that JSON node "%s" is object with properties count is %d, actual is %d`,
 				a.path,
@@ -75,8 +71,7 @@ func (a *ObjectAssertion) WithPropertiesCountGreaterThan(expected int, msgAndArg
 	a.t.Helper()
 
 	if len(a.value) <= expected {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				`failed asserting that JSON node "%s" is object with properties count greater than %d, actual is %d`,
 				a.path,
@@ -99,8 +94,7 @@ func (a *ObjectAssertion) WithPropertiesCountGreaterThanOrEqual(expected int, ms
 	a.t.Helper()
 
 	if len(a.value) < expected {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				`failed asserting that JSON node "%s" is object with properties count greater than or equal to %d, actual is %d`,
 				a.path,
@@ -122,8 +116,7 @@ func (a *ObjectAssertion) WithPropertiesCountLessThan(expected int, msgAndArgs .
 	a.t.Helper()
 
 	if len(a.value) >= expected {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				`failed asserting that JSON node "%s" is object with properties count less than %d, actual is %d`,
 				a.path,
@@ -146,8 +139,7 @@ func (a *ObjectAssertion) WithPropertiesCountLessThanOrEqual(expected int, msgAn
 	a.t.Helper()
 
 	if len(a.value) > expected {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				`failed asserting that JSON node "%s" is object with properties count less than or equal to %d, actual is %d`,
 				a.path,
@@ -192,8 +184,7 @@ func (a *ObjectAssertion) WithUniqueElements(msgAndArgs ...interface{}) *ObjectA
 	}
 
 	if len(duplicates) > 0 {
-		assert.Fail(
-			a.t,
+		a.fail(
 			fmt.Sprintf(
 				"failed asserting that JSON node \"%s\" is object with unique elements, duplicated elements:\n%s",
 				a.path,
@@ -220,6 +211,14 @@ func (a *ObjectAssertion) PropertiesCount() int {
 // It is an alias for IsObject().PropertiesCount().
 func (node *AssertNode) ObjectPropertiesCount() int {
 	return node.IsObject().PropertiesCount()
+}
+
+func (a *ObjectAssertion) fail(message string, msgAndArgs ...interface{}) {
+	a.t.Helper()
+	if a.message != "" {
+		message = a.message + ": " + message
+	}
+	assert.Fail(a.t, message, msgAndArgs...)
 }
 
 func quoteAll(s []string) []string {
