@@ -60,6 +60,7 @@ import (
     "testing"
 
     "github.com/gofrs/uuid"
+    "github.com/golang-jwt/jwt/v4"
     "github.com/muonsoft/api-testing/assertjson"
     "github.com/stretchr/testify/assert"
 )
@@ -135,6 +136,18 @@ func TestYourAPI(t *testing.T) {
         json.Node("/email").IsEmail()
         json.Node("/email").IsHTML5Email()
         json.Node("/url").IsURL().WithSchemas("https").WithHosts("example.com")
+        json.Node("/jwt").
+            IsJWT(func(token *jwt.Token) (interface{}, error) {
+                return []byte("your-256-bit-secret"), nil
+            }).
+            Algorithm("HS256").
+            Header(func(json *assertjson.AssertJSON) {
+                json.Node("/alg").IsString().EqualTo("HS256")
+                json.Node("/typ").IsString().EqualTo("JWT")
+            }).
+            Payload(func(json *assertjson.AssertJSON) {
+                json.Node("/name").IsString().EqualTo("John Doe")
+            })
 
         // array assertions
         json.Node("/arrayNode").IsArray()

@@ -11,6 +11,7 @@
   "nilUUID": "00000000-0000-0000-0000-000000000000",
   "email": "user@example.com",
   "url": "https://example.com",
+  "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
   "arrayNode": [
     "arrayValue"
   ],
