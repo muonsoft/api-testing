@@ -98,14 +98,20 @@ func (a *JWTAssertion) Payload(jsonAssert JSONAssertFunc) *JWTAssertion {
 	return a
 }
 
-// Token returns decoded jwt.Token.
-func (a *JWTAssertion) Token() *jwt.Token {
+// Value returns decoded jwt.Token. If parsing fails it will return empty struct.
+func (a *JWTAssertion) Value() *jwt.Token {
 	if a == nil {
-		return nil
+		return &jwt.Token{}
 	}
 	a.t.Helper()
 
 	return a.token
+}
+
+// JWT asserts that the JSON node is JWT and returns decoded jwt.Token. If value is not a valid JWT,
+// then it will return empty struct. It is an alias for IsJWT().Value().
+func (node *AssertNode) JWT(keyFunc jwt.Keyfunc) *jwt.Token {
+	return node.IsJWT(keyFunc).Value()
 }
 
 // Assert asserts that the JWT is satisfied by the user function assertFunc.

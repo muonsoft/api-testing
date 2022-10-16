@@ -55,9 +55,9 @@ package yours
 
 import (
     "fmt"
-    "net/http"
     "net/http/httptest"
     "testing"
+    "time"
 
     "github.com/gofrs/uuid"
     "github.com/golang-jwt/jwt/v4"
@@ -92,6 +92,8 @@ func TestYourAPI(t *testing.T) {
         // fluent string assertions
         json.Node("/stringNode").IsString()
         json.Node("/stringNode").IsString().EqualTo("stringValue")
+        json.Node("/stringNode").IsString().EqualToOneOf("stringValue", "nextValue")
+        json.Node("/stringNode").IsString().NotEqualTo("invalid")
         json.Node("/stringNode").IsString().Matches("^string.*$")
         json.Node("/stringNode").IsString().NotMatches("^notMatch$")
         json.Node("/stringNode").IsString().Contains("string")
@@ -114,6 +116,7 @@ func TestYourAPI(t *testing.T) {
         // numeric assertions
         json.Node("/integerNode").IsInteger()
         json.Node("/integerNode").IsInteger().EqualTo(123)
+        json.Node("/integerNode").IsInteger().NotEqualTo(321)
         json.Node("/integerNode").IsInteger().GreaterThan(122)
         json.Node("/integerNode").IsInteger().GreaterThanOrEqual(123)
         json.Node("/integerNode").IsInteger().LessThan(124)
@@ -121,6 +124,7 @@ func TestYourAPI(t *testing.T) {
         json.Node("/floatNode").IsFloat()
         json.Node("/floatNode").IsNumber()
         json.Node("/floatNode").IsNumber().EqualTo(123.123)
+        json.Node("/floatNode").IsNumber().NotEqualTo(321.123)
         json.Node("/floatNode").IsNumber().EqualToWithDelta(123.123, 0.1)
         json.Node("/floatNode").IsNumber().GreaterThan(122)
         json.Node("/floatNode").IsNumber().GreaterThanOrEqual(123.123)
@@ -132,6 +136,7 @@ func TestYourAPI(t *testing.T) {
         json.Node("/uuid").IsString().WithUUID()
         json.Node("/uuid").IsUUID().NotNil().Version(4).Variant(1)
         json.Node("/uuid").IsUUID().EqualTo(uuid.FromStringOrNil("23e98a0c-26c8-410f-978f-d1d67228af87"))
+        json.Node("/uuid").IsUUID().NotEqualTo(uuid.FromStringOrNil("a54cbd42-b30c-4619-b89a-47375734d49c"))
         json.Node("/nilUUID").IsUUID().Nil()
         json.Node("/email").IsEmail()
         json.Node("/email").IsHTML5Email()
@@ -148,6 +153,20 @@ func TestYourAPI(t *testing.T) {
             Payload(func(json *assertjson.AssertJSON) {
                 json.Node("/name").IsString().EqualTo("John Doe")
             })
+
+        // time assertions
+        json.Node("/time").IsTime().EqualTo(time.Date(2022, time.October, 16, 12, 14, 32, 0, time.UTC))
+        json.Node("/time").IsTime().NotEqualTo(time.Date(2021, time.October, 16, 12, 14, 32, 0, time.UTC))
+        json.Node("/time").IsTime().AfterOrEqualTo(time.Date(2022, time.October, 16, 12, 14, 32, 0, time.UTC))
+        json.Node("/time").IsTime().After(time.Date(2021, time.October, 16, 12, 14, 32, 0, time.UTC))
+        json.Node("/time").IsTime().Before(time.Date(2023, time.October, 16, 12, 14, 32, 0, time.UTC))
+        json.Node("/time").IsTime().BeforeOrEqualTo(time.Date(2022, time.October, 16, 12, 14, 32, 0, time.UTC))
+        json.Node("/date").IsDate().EqualToDate(2022, time.October, 16)
+        json.Node("/date").IsDate().NotEqualToDate(2021, time.October, 16)
+        json.Node("/date").IsDate().AfterDate(2021, time.October, 16)
+        json.Node("/date").IsDate().AfterOrEqualToDate(2022, time.October, 16)
+        json.Node("/date").IsDate().BeforeDate(2023, time.October, 16)
+        json.Node("/date").IsDate().BeforeOrEqualToDate(2022, time.October, 16)
 
         // array assertions
         json.Node("/arrayNode").IsArray()
@@ -198,6 +217,7 @@ func TestYourAPI(t *testing.T) {
         assert.Equal(t, 1, json.Node("/objectNode").IsObject().PropertiesCount())
         assert.Equal(t, 1, json.Node("/objectNode").ObjectPropertiesCount())
         assert.JSONEq(t, `{"objectKey": "objectValue"}`, string(json.Node("/objectNode").JSON()))
+        assert.Equal(t, "2022-10-16T15:14:32+03:00", json.Node("/time").Time().Format(time.RFC3339))
         assert.Equal(t, "23e98a0c-26c8-410f-978f-d1d67228af87", json.Node("/uuid").IsUUID().Value().String())
         assert.Equal(t, "23e98a0c-26c8-410f-978f-d1d67228af87", json.Node("/uuid").UUID().String())
     })

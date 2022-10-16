@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/golang-jwt/jwt/v4"
@@ -41,6 +42,8 @@ func TestFileHas(t *testing.T) {
 		// fluent string assertions
 		json.Node("/stringNode").IsString()
 		json.Node("/stringNode").IsString().EqualTo("stringValue")
+		json.Node("/stringNode").IsString().EqualToOneOf("stringValue", "nextValue")
+		json.Node("/stringNode").IsString().NotEqualTo("invalid")
 		json.Node("/stringNode").IsString().Matches("^string.*$")
 		json.Node("/stringNode").IsString().NotMatches("^notMatch$")
 		json.Node("/stringNode").IsString().Contains("string")
@@ -64,6 +67,7 @@ func TestFileHas(t *testing.T) {
 		// numeric assertions
 		json.Node("/integerNode").IsInteger()
 		json.Node("/integerNode").IsInteger().EqualTo(123)
+		json.Node("/integerNode").IsInteger().NotEqualTo(321)
 		json.Node("/integerNode").IsInteger().GreaterThan(122)
 		json.Node("/integerNode").IsInteger().GreaterThanOrEqual(123)
 		json.Node("/integerNode").IsInteger().LessThan(124)
@@ -77,6 +81,7 @@ func TestFileHas(t *testing.T) {
 		json.Node("/floatNode").IsFloat()
 		json.Node("/floatNode").IsNumber()
 		json.Node("/floatNode").IsNumber().EqualTo(123.123)
+		json.Node("/floatNode").IsNumber().NotEqualTo(321.123)
 		json.Node("/floatNode").IsNumber().EqualToWithDelta(123.123, 0.1)
 		json.Node("/floatNode").IsNumber().GreaterThan(122)
 		json.Node("/floatNode").IsNumber().GreaterThanOrEqual(123.123)
@@ -94,6 +99,7 @@ func TestFileHas(t *testing.T) {
 		json.Node("/uuid").IsString().WithUUID()
 		json.Node("/uuid").IsUUID().NotNil().Version(4).Variant(1)
 		json.Node("/uuid").IsUUID().EqualTo(uuid.FromStringOrNil("23e98a0c-26c8-410f-978f-d1d67228af87"))
+		json.Node("/uuid").IsUUID().NotEqualTo(uuid.FromStringOrNil("a54cbd42-b30c-4619-b89a-47375734d49c"))
 		json.Node("/nilUUID").IsUUID().Nil()
 		json.Node("/email").IsEmail()
 		json.Node("/email").IsHTML5Email()
@@ -110,6 +116,20 @@ func TestFileHas(t *testing.T) {
 			Payload(func(json *assertjson.AssertJSON) {
 				json.Node("/name").IsString().EqualTo("John Doe")
 			})
+
+		// time assertions
+		json.Node("/time").IsTime().EqualTo(time.Date(2022, time.October, 16, 12, 14, 32, 0, time.UTC))
+		json.Node("/time").IsTime().NotEqualTo(time.Date(2021, time.October, 16, 12, 14, 32, 0, time.UTC))
+		json.Node("/time").IsTime().AfterOrEqualTo(time.Date(2022, time.October, 16, 12, 14, 32, 0, time.UTC))
+		json.Node("/time").IsTime().After(time.Date(2021, time.October, 16, 12, 14, 32, 0, time.UTC))
+		json.Node("/time").IsTime().Before(time.Date(2023, time.October, 16, 12, 14, 32, 0, time.UTC))
+		json.Node("/time").IsTime().BeforeOrEqualTo(time.Date(2022, time.October, 16, 12, 14, 32, 0, time.UTC))
+		json.Node("/date").IsDate().EqualToDate(2022, time.October, 16)
+		json.Node("/date").IsDate().NotEqualToDate(2021, time.October, 16)
+		json.Node("/date").IsDate().AfterDate(2021, time.October, 16)
+		json.Node("/date").IsDate().AfterOrEqualToDate(2022, time.October, 16)
+		json.Node("/date").IsDate().BeforeDate(2023, time.October, 16)
+		json.Node("/date").IsDate().BeforeOrEqualToDate(2022, time.October, 16)
 
 		// array assertions
 		json.Node("/arrayNode").IsArrayWithElementsCount(1)
@@ -162,8 +182,26 @@ func TestFileHas(t *testing.T) {
 		assert.Equal(t, 1, json.Node("/objectNode").IsObject().PropertiesCount())
 		assert.Equal(t, 1, json.Node("/objectNode").ObjectPropertiesCount())
 		assert.JSONEq(t, `{"objectKey": "objectValue"}`, string(json.Node("/objectNode").JSON()))
+		assert.Equal(t, "2022-10-16T15:14:32+03:00", json.Node("/time").Time().Format(time.RFC3339))
 		assert.Equal(t, "23e98a0c-26c8-410f-978f-d1d67228af87", json.Node("/uuid").IsUUID().Value().String())
 		assert.Equal(t, "23e98a0c-26c8-410f-978f-d1d67228af87", json.Node("/uuid").UUID().String())
+		assert.Equal(t,
+			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+			json.Node("/jwt").
+				IsJWT(func(token *jwt.Token) (interface{}, error) {
+					return []byte("your-256-bit-secret"), nil
+				}).
+				Value().
+				Raw,
+		)
+		assert.Equal(t,
+			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+			json.Node("/jwt").
+				JWT(func(token *jwt.Token) (interface{}, error) {
+					return []byte("your-256-bit-secret"), nil
+				}).
+				Raw,
+		)
 	})
 }
 
@@ -1562,6 +1600,285 @@ func TestHas(t *testing.T) {
 			},
 		},
 		{
+			name: "JSON node is time",
+			json: `{"key": "2022-10-16T15:14:32+03:00"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsTime()
+			},
+		},
+		{
+			name: "JSON node is time fails",
+			json: `{"key": "invalid"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsTime()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is time: parsing time "invalid" as "2006-01-02T15:04:05Z07:00": cannot parse "invalid" as "2006"`,
+			},
+		},
+		{
+			name: "JSON node is time with layout",
+			json: `{"key": "16 Oct 22 15:20 MSK"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsTimeWithLayout(time.RFC822)
+			},
+		},
+		{
+			name: "JSON node is time with layout fails",
+			json: `{"key": "invalid"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsTimeWithLayout(time.RFC822)
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is time: parsing time "invalid" as "02 Jan 06 15:04 MST": cannot parse "invalid" as "02"`,
+			},
+		},
+		{
+			name: "JSON node is time equal",
+			json: `{"key": "2022-10-16T15:14:32+03:00"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsTime().EqualTo(parseTime("2022-10-16T15:14:32+03:00"))
+			},
+		},
+		{
+			name: "JSON node is time equal fails",
+			json: `{"key": "2022-10-16T15:14:32+03:00"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsTime().EqualTo(parseTime("2022-11-17T16:15:43+03:00"))
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is time equal to "2022-11-17T16:15:43+03:00", actual is "2022-10-16T15:14:32+03:00"`,
+			},
+		},
+		{
+			name: "JSON node is time not equal",
+			json: `{"key": "2022-10-16T15:14:32+03:00"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsTime().NotEqualTo(parseTime("2022-11-17T16:15:43+03:00"))
+			},
+		},
+		{
+			name: "JSON node is time not equal fails",
+			json: `{"key": "2022-10-16T15:14:32+03:00"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsTime().NotEqualTo(parseTime("2022-10-16T15:14:32+03:00"))
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is time not equal to "2022-10-16T15:14:32+03:00", actual is "2022-10-16T15:14:32+03:00"`,
+			},
+		},
+		{
+			name: "JSON node is time after",
+			json: `{"key": "2022-10-16T15:14:32+03:00"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsTime().After(parseTime("2022-10-16T00:00:00+03:00"))
+			},
+		},
+		{
+			name: "JSON node is time after fails",
+			json: `{"key": "2022-10-16T15:14:32+03:00"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsTime().After(parseTime("2022-10-17T00:00:00+03:00"))
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is time after "2022-10-17T00:00:00+03:00", actual is "2022-10-16T15:14:32+03:00"`,
+			},
+		},
+		{
+			name: "JSON node is time after or equal",
+			json: `{"key": "2022-10-16T15:14:32+03:00"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsTime().AfterOrEqualTo(parseTime("2022-10-16T15:14:32+03:00"))
+			},
+		},
+		{
+			name: "JSON node is time after or equal fails",
+			json: `{"key": "2022-10-16T15:14:32+03:00"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsTime().AfterOrEqualTo(parseTime("2022-10-16T15:14:33+03:00"))
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is time after or equal to "2022-10-16T15:14:33+03:00", actual is "2022-10-16T15:14:32+03:00"`,
+			},
+		},
+		{
+			name: "JSON node is time before",
+			json: `{"key": "2022-10-16T15:14:32+03:00"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsTime().Before(parseTime("2022-10-17T00:00:00+03:00"))
+			},
+		},
+		{
+			name: "JSON node is time before fails",
+			json: `{"key": "2022-10-16T15:14:32+03:00"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsTime().Before(parseTime("2022-10-16T00:00:00+03:00"))
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is time before "2022-10-16T00:00:00+03:00", actual is "2022-10-16T15:14:32+03:00"`,
+			},
+		},
+		{
+			name: "JSON node is time before or equal",
+			json: `{"key": "2022-10-16T15:14:32+03:00"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsTime().BeforeOrEqualTo(parseTime("2022-10-16T15:14:32+03:00"))
+			},
+		},
+		{
+			name: "JSON node is time before or equal fails",
+			json: `{"key": "2022-10-16T15:14:32+03:00"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsTime().BeforeOrEqualTo(parseTime("2022-10-16T15:14:31+03:00"))
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is time before or equal to "2022-10-16T15:14:31+03:00", actual is "2022-10-16T15:14:32+03:00"`,
+			},
+		},
+		{
+			name: "JSON node is date",
+			json: `{"key": "2022-10-16"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsDate()
+			},
+		},
+		{
+			name: "JSON node is date fails",
+			json: `{"key": "invalid"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsDate()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is time: parsing time "invalid" as "2006-01-02": cannot parse "invalid" as "2006"`,
+			},
+		},
+		{
+			name: "JSON node is date equal",
+			json: `{"key": "2022-10-16"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsDate().EqualToDate(2022, time.October, 16)
+			},
+		},
+		{
+			name: "JSON node is date equal fails",
+			json: `{"key": "2022-10-16"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsDate().EqualToDate(2022, time.October, 15)
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is time equal to "2022-10-15", actual is "2022-10-16"`,
+			},
+		},
+		{
+			name: "JSON node is date not equal",
+			json: `{"key": "2022-10-16"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsDate().NotEqualToDate(2022, time.October, 15)
+			},
+		},
+		{
+			name: "JSON node is date not equal fails",
+			json: `{"key": "2022-10-16"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsDate().NotEqualToDate(2022, time.October, 16)
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is time not equal to "2022-10-16", actual is "2022-10-16"`,
+			},
+		},
+		{
+			name: "JSON node is date after",
+			json: `{"key": "2022-10-16"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsDate().AfterDate(2022, time.October, 15)
+			},
+		},
+		{
+			name: "JSON node is date after fails",
+			json: `{"key": "2022-10-16"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsDate().AfterDate(2022, time.October, 16)
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is time after "2022-10-16", actual is "2022-10-16"`,
+			},
+		},
+		{
+			name: "JSON node is date after or equal",
+			json: `{"key": "2022-10-16"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsDate().AfterOrEqualToDate(2022, time.October, 16)
+			},
+		},
+		{
+			name: "JSON node is date after or equal fails",
+			json: `{"key": "2022-10-16"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsDate().AfterOrEqualToDate(2022, time.October, 17)
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is time after or equal to "2022-10-17", actual is "2022-10-16"`,
+			},
+		},
+		{
+			name: "JSON node is date before",
+			json: `{"key": "2022-10-16"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsDate().BeforeDate(2022, time.October, 17)
+			},
+		},
+		{
+			name: "JSON node is date before fails",
+			json: `{"key": "2022-10-16"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsDate().BeforeDate(2022, time.October, 16)
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is time before "2022-10-16", actual is "2022-10-16"`,
+			},
+		},
+		{
+			name: "JSON node is date before or equal",
+			json: `{"key": "2022-10-16"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsDate().BeforeOrEqualToDate(2022, time.October, 16)
+			},
+		},
+		{
+			name: "JSON node is date before or equal fails",
+			json: `{"key": "2022-10-16"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsDate().BeforeOrEqualToDate(2022, time.October, 15)
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is time before or equal to "2022-10-15", actual is "2022-10-16"`,
+			},
+		},
+		{
+			name: "JSON node is time fails once for a chain",
+			json: `{"key": null}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").
+					IsTime().
+					EqualTo(time.Now()).
+					NotEqualTo(time.Now()).
+					After(time.Now()).
+					AfterOrEqualTo(time.Now()).
+					Before(time.Now()).
+					BeforeOrEqualTo(time.Now()).
+					EqualToDate(0, 0, 0).
+					NotEqualToDate(0, 0, 0).
+					AfterDate(0, 0, 0).
+					AfterOrEqualToDate(0, 0, 0).
+					BeforeDate(0, 0, 0).
+					BeforeOrEqualToDate(0, 0, 0).
+					Value()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is string`,
+			},
+		},
+		{
 			name: "JSON node is JSON",
 			json: `{"key": "{\"key\": \"value\"}"}`,
 			assert: func(json *assertjson.AssertJSON) {
@@ -1628,6 +1945,18 @@ func TestHas(t *testing.T) {
 			},
 			wantMessages: []string{
 				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" is URL with hosts "example.net", actual is "example.com"`,
+			},
+		},
+		{
+			name: "JSON node is JSON: time assertion failed",
+			json: `{"key": "{\"key\": \"2022-10-16\"}"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsString().WithJSON(func(json *assertjson.AssertJSON) {
+					json.Node("/key").IsDate().EqualToDate(2022, time.October, 15)
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" is time equal to "2022-10-15", actual is "2022-10-16"`,
 			},
 		},
 		{
@@ -1852,4 +2181,12 @@ func TestAssertNode_Exists(t *testing.T) {
 
 func getJWTSecret(token *jwt.Token) (interface{}, error) {
 	return []byte("your-256-bit-secret"), nil
+}
+
+func parseTime(s string) time.Time {
+	t, err := time.Parse(time.RFC3339, s)
+	if err != nil {
+		panic(err)
+	}
+	return t
 }
