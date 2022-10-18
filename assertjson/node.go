@@ -137,10 +137,7 @@ func (node *AssertNode) ForEach(assertNode func(node *AssertNode)) {
 
 func (node *AssertNode) fail(message string, msgAndArgs ...interface{}) {
 	node.t.Helper()
-	if node.message != "" {
-		message = node.message + ": " + message
-	}
-	assert.Fail(node.t, message, msgAndArgs...)
+	assert.Fail(node.t, node.message+message, msgAndArgs...)
 }
 
 func (node *AssertNode) exists() bool {

@@ -1,7 +1,5 @@
 package assertjson
 
-import "fmt"
-
 // WithJSON asserts that the JSON node has a string value with JSON.
 func (a *StringAssertion) WithJSON(jsonAssert JSONAssertFunc) *StringAssertion {
 	if a == nil {
@@ -11,7 +9,7 @@ func (a *StringAssertion) WithJSON(jsonAssert JSONAssertFunc) *StringAssertion {
 
 	body := &AssertJSON{
 		t:       a.t,
-		message: fmt.Sprintf(`failed asserting that JSON node "%s" is string with JSON`, a.path),
+		message: a.message + `is string with JSON: `,
 	}
 	body.assert([]byte(a.value), jsonAssert)
 

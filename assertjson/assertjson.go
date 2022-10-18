@@ -112,8 +112,5 @@ func (j *AssertJSON) assert(data []byte, jsonAssert JSONAssertFunc) {
 
 func (j *AssertJSON) fail(message string, msgAndArgs ...interface{}) {
 	j.t.Helper()
-	if j.message != "" {
-		message = j.message + ": " + message
-	}
-	assert.Fail(j.t, message, msgAndArgs...)
+	assert.Fail(j.t, j.message+message, msgAndArgs...)
 }

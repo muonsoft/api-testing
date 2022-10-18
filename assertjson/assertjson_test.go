@@ -1,6 +1,7 @@
 package assertjson_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"regexp"
@@ -108,12 +109,12 @@ func TestFileHas(t *testing.T) {
 			IsJWT(func(token *jwt.Token) (interface{}, error) {
 				return []byte("your-256-bit-secret"), nil
 			}).
-			Algorithm("HS256").
-			Header(func(json *assertjson.AssertJSON) {
+			WithAlgorithm("HS256").
+			WithHeader(func(json *assertjson.AssertJSON) {
 				json.Node("/alg").IsString().EqualTo("HS256")
 				json.Node("/typ").IsString().EqualTo("JWT")
 			}).
-			Payload(func(json *assertjson.AssertJSON) {
+			WithPayload(func(json *assertjson.AssertJSON) {
 				json.Node("/name").IsString().EqualTo("John Doe")
 			})
 
@@ -247,7 +248,7 @@ func TestHas(t *testing.T) {
 				})
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/array/1" equal to "value", actual is "v"`,
+				`failed asserting that JSON node "/array/1": equal to "value", actual is "v"`,
 			},
 		},
 		{
@@ -268,7 +269,7 @@ func TestHas(t *testing.T) {
 				})
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/object/b" equal to "value", actual is "v"`,
+				`failed asserting that JSON node "/object/b": equal to "value", actual is "v"`,
 			},
 		},
 		{
@@ -452,7 +453,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsNumber().EqualTo(321.123)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" equal to 321.123000, actual is 123.123000`,
+				`failed asserting that JSON node "/key": equal to 321.123000, actual is 123.123000`,
 			},
 		},
 		{
@@ -469,7 +470,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsNumber().NotEqualTo(123.123)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" not equal to 123.123000, actual is 123.123000`,
+				`failed asserting that JSON node "/key": not equal to 123.123000, actual is 123.123000`,
 			},
 		},
 		{
@@ -486,7 +487,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsNumber().EqualToWithDelta(321.123, 1)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" equal to 321.123000 with delta 1.000000, actual is 123.123000`,
+				`failed asserting that JSON node "/key": equal to 321.123000 with delta 1.000000, actual is 123.123000`,
 			},
 		},
 		{
@@ -503,7 +504,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsNumber().GreaterThan(123.123)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" greater than 123.123000, actual is 123.123000`,
+				`failed asserting that JSON node "/key": greater than 123.123000, actual is 123.123000`,
 			},
 		},
 		{
@@ -520,7 +521,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsNumber().GreaterThanOrEqual(123.124)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" greater than or equal 123.124000, actual is 123.123000`,
+				`failed asserting that JSON node "/key": greater than or equal 123.124000, actual is 123.123000`,
 			},
 		},
 		{
@@ -537,7 +538,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsNumber().LessThan(123.123)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" less than 123.123000, actual is 123.123000`,
+				`failed asserting that JSON node "/key": less than 123.123000, actual is 123.123000`,
 			},
 		},
 		{
@@ -554,7 +555,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsNumber().LessThanOrEqual(123.122)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" less than or equal 123.122000, actual is 123.123000`,
+				`failed asserting that JSON node "/key": less than or equal 123.122000, actual is 123.123000`,
 			},
 		},
 		{
@@ -616,7 +617,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsInteger().EqualTo(321)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" equal to 321, actual is 123`,
+				`failed asserting that JSON node "/key": equal to 321, actual is 123`,
 			},
 		},
 		{
@@ -633,7 +634,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsInteger().NotEqualTo(123)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" not equal to 123, actual is 123`,
+				`failed asserting that JSON node "/key": not equal to 123, actual is 123`,
 			},
 		},
 		{
@@ -650,7 +651,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsInteger().GreaterThan(123)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" greater than 123, actual is 123`,
+				`failed asserting that JSON node "/key": greater than 123, actual is 123`,
 			},
 		},
 		{
@@ -667,7 +668,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsInteger().GreaterThanOrEqual(124)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" greater than or equal 124, actual is 123`,
+				`failed asserting that JSON node "/key": greater than or equal 124, actual is 123`,
 			},
 		},
 		{
@@ -684,7 +685,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsInteger().LessThan(123)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" less than 123, actual is 123`,
+				`failed asserting that JSON node "/key": less than 123, actual is 123`,
 			},
 		},
 		{
@@ -701,7 +702,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsInteger().LessThanOrEqual(122)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" less than or equal 122, actual is 123`,
+				`failed asserting that JSON node "/key": less than or equal 122, actual is 123`,
 			},
 		},
 		{
@@ -752,7 +753,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsString().EqualTo("string")
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" equal to "string", actual is "value"`,
+				`failed asserting that JSON node "/key": equal to "string", actual is "value"`,
 			},
 		},
 		{
@@ -769,7 +770,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsString().NotEqualTo("value")
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" not equal to "value", actual is "value"`,
+				`failed asserting that JSON node "/key": not equal to "value", actual is "value"`,
 			},
 		},
 		{
@@ -786,7 +787,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsString().EqualToOneOf("foo", "bar")
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" equal to one of values ("foo", "bar"), actual is "value"`,
+				`failed asserting that JSON node "/key": equal to one of values ("foo", "bar"), actual is "value"`,
 			},
 		},
 		{
@@ -803,7 +804,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsString().Matches("\\d+")
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" matches "\d+", actual is "value"`,
+				`failed asserting that JSON node "/key": matches "\d+", actual is "value"`,
 			},
 		},
 		{
@@ -820,7 +821,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsString().Matches(regexp.MustCompile(`\d+`))
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" matches "\d+", actual is "value"`,
+				`failed asserting that JSON node "/key": matches "\d+", actual is "value"`,
 			},
 		},
 		{
@@ -837,7 +838,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsString().NotMatches(".*")
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" not matches ".*", actual is "value"`,
+				`failed asserting that JSON node "/key": not matches ".*", actual is "value"`,
 			},
 		},
 		{
@@ -854,7 +855,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsString().NotMatches(regexp.MustCompile(".*"))
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" not matches ".*", actual is "value"`,
+				`failed asserting that JSON node "/key": not matches ".*", actual is "value"`,
 			},
 		},
 		{
@@ -871,7 +872,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsString().Contains("string")
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" contains "string", actual is "value"`,
+				`failed asserting that JSON node "/key": contains "string", actual is "value"`,
 			},
 		},
 		{
@@ -888,7 +889,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsString().NotContains("alu")
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" not contains "alu", actual is "value"`,
+				`failed asserting that JSON node "/key": not contains "alu", actual is "value"`,
 			},
 		},
 		{
@@ -905,7 +906,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsString().WithLength(4)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with length is 4, actual is 5`,
+				`failed asserting that JSON node "/key": is string with length is 4, actual is 5`,
 			},
 		},
 		{
@@ -922,7 +923,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsString().WithLengthGreaterThan(5)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with length greater than 5, actual is 5`,
+				`failed asserting that JSON node "/key": is string with length greater than 5, actual is 5`,
 			},
 		},
 		{
@@ -939,7 +940,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsString().WithLengthGreaterThanOrEqual(6)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with length greater than or equal to 6, actual is 5`,
+				`failed asserting that JSON node "/key": is string with length greater than or equal to 6, actual is 5`,
 			},
 		},
 		{
@@ -956,7 +957,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsString().WithLengthLessThan(5)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with length less than 5, actual is 5`,
+				`failed asserting that JSON node "/key": is string with length less than 5, actual is 5`,
 			},
 		},
 		{
@@ -973,7 +974,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsString().WithLengthLessThanOrEqual(4)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with length less than or equal to 4, actual is 5`,
+				`failed asserting that JSON node "/key": is string with length less than or equal to 4, actual is 5`,
 			},
 		},
 		{
@@ -1055,7 +1056,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsArray().WithLength(2)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is array with length is 2, actual is 3`,
+				`failed asserting that JSON node "/key": is array with length is 2, actual is 3`,
 			},
 		},
 		{
@@ -1072,7 +1073,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsArray().WithLengthGreaterThan(5)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is array with length greater than 5, actual is 5`,
+				`failed asserting that JSON node "/key": is array with length greater than 5, actual is 5`,
 			},
 		},
 		{
@@ -1089,7 +1090,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsArray().WithLengthGreaterThanOrEqual(6)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is array with length greater than or equal to 6, actual is 5`,
+				`failed asserting that JSON node "/key": is array with length greater than or equal to 6, actual is 5`,
 			},
 		},
 		{
@@ -1106,7 +1107,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsArray().WithLengthLessThan(5)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is array with length less than 5, actual is 5`,
+				`failed asserting that JSON node "/key": is array with length less than 5, actual is 5`,
 			},
 		},
 		{
@@ -1123,7 +1124,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsArray().WithLengthLessThanOrEqual(4)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is array with length less than or equal to 4, actual is 5`,
+				`failed asserting that JSON node "/key": is array with length less than or equal to 4, actual is 5`,
 			},
 		},
 		{
@@ -1209,7 +1210,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsObject().WithPropertiesCount(2)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is object with properties count is 2, actual is 3`,
+				`failed asserting that JSON node "/key": is object with properties count is 2, actual is 3`,
 			},
 		},
 		{
@@ -1226,7 +1227,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsObject().WithPropertiesCountGreaterThan(5)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is object with properties count greater than 5, actual is 5`,
+				`failed asserting that JSON node "/key": is object with properties count greater than 5, actual is 5`,
 			},
 		},
 		{
@@ -1243,7 +1244,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsObject().WithPropertiesCountGreaterThanOrEqual(6)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is object with properties count greater than or equal to 6, actual is 5`,
+				`failed asserting that JSON node "/key": is object with properties count greater than or equal to 6, actual is 5`,
 			},
 		},
 		{
@@ -1260,7 +1261,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsObject().WithPropertiesCountLessThan(5)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is object with properties count less than 5, actual is 5`,
+				`failed asserting that JSON node "/key": is object with properties count less than 5, actual is 5`,
 			},
 		},
 		{
@@ -1277,7 +1278,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsObject().WithPropertiesCountLessThanOrEqual(4)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is object with properties count less than or equal to 4, actual is 5`,
+				`failed asserting that JSON node "/key": is object with properties count less than or equal to 4, actual is 5`,
 			},
 		},
 		{
@@ -1294,7 +1295,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsObject().WithUniqueElements()
 			},
 			wantMessages: []string{
-				"failed asserting that JSON node \"/key\" is object with unique elements, duplicated elements",
+				"failed asserting that JSON node \"/key\": is object with unique elements, duplicated elements",
 			},
 		},
 		{
@@ -1311,7 +1312,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsObject().WithUniqueElements()
 			},
 			wantMessages: []string{
-				"failed asserting that JSON node \"/key\" is object with unique elements, duplicated elements",
+				"failed asserting that JSON node \"/key\": is object with unique elements, duplicated elements",
 			},
 		},
 		{
@@ -1363,7 +1364,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsUUID().Nil()
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is nil UUID, actual is "bf0d10a1-d74c-436a-9db1-77c23b5e464f"`,
+				`failed asserting that JSON node "/key": is nil UUID, actual is "bf0d10a1-d74c-436a-9db1-77c23b5e464f"`,
 			},
 		},
 		{
@@ -1380,7 +1381,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsUUID().NotNil()
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is not nil UUID, actual is "00000000-0000-0000-0000-000000000000"`,
+				`failed asserting that JSON node "/key": is not nil UUID, actual is "00000000-0000-0000-0000-000000000000"`,
 			},
 		},
 		{
@@ -1397,7 +1398,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsUUID().Version(4)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is UUID of version 4, actual is 0`,
+				`failed asserting that JSON node "/key": is UUID of version 4, actual is 0`,
 			},
 		},
 		{
@@ -1414,7 +1415,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsUUID().Variant(1)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is UUID of variant 1, actual is 0`,
+				`failed asserting that JSON node "/key": is UUID of variant 1, actual is 0`,
 			},
 		},
 		{
@@ -1431,7 +1432,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsUUID().EqualTo(uuid.FromStringOrNil("01fb115c-0fdc-4072-b5ae-c517689d670c"))
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is UUID equal to "01fb115c-0fdc-4072-b5ae-c517689d670c", actual is "bf0d10a1-d74c-436a-9db1-77c23b5e464f"`,
+				`failed asserting that JSON node "/key": is UUID equal to "01fb115c-0fdc-4072-b5ae-c517689d670c", actual is "bf0d10a1-d74c-436a-9db1-77c23b5e464f"`,
 			},
 		},
 		{
@@ -1448,7 +1449,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsUUID().NotEqualTo(uuid.FromStringOrNil("bf0d10a1-d74c-436a-9db1-77c23b5e464f"))
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is UUID not equal to "bf0d10a1-d74c-436a-9db1-77c23b5e464f", actual is "bf0d10a1-d74c-436a-9db1-77c23b5e464f"`,
+				`failed asserting that JSON node "/key": is UUID not equal to "bf0d10a1-d74c-436a-9db1-77c23b5e464f", actual is "bf0d10a1-d74c-436a-9db1-77c23b5e464f"`,
 			},
 		},
 		{
@@ -1483,7 +1484,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsEmail()
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is email, actual is "user @ example.com"`,
+				`failed asserting that JSON node "/key": is email, actual is "user @ example.com"`,
 			},
 		},
 		{
@@ -1500,7 +1501,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsHTML5Email()
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is email (HTML5 format), actual is "user @ example.com"`,
+				`failed asserting that JSON node "/key": is email (HTML5 format), actual is "user @ example.com"`,
 			},
 		},
 		{
@@ -1517,7 +1518,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsURL()
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is URL, actual is "invalid\:"`,
+				`failed asserting that JSON node "/key": is URL, actual is "invalid\:"`,
 			},
 		},
 		{
@@ -1527,7 +1528,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsURL()
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is URL, actual is "http://example.com/exploit.html?not_a%hex"`,
+				`failed asserting that JSON node "/key": is URL, actual is "http://example.com/exploit.html?not_a%hex"`,
 			},
 		},
 		{
@@ -1544,7 +1545,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsURL().WithSchemas("http", "https")
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is URL with schemas "http", "https", actual is "ftp"`,
+				`failed asserting that JSON node "/key": is URL with schemas "http", "https", actual is "ftp"`,
 			},
 		},
 		{
@@ -1561,7 +1562,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsURL().WithHosts("example.com", "example.net")
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is URL with hosts "example.com", "example.net", actual is "example.dev"`,
+				`failed asserting that JSON node "/key": is URL with hosts "example.com", "example.net", actual is "example.dev"`,
 			},
 		},
 		{
@@ -1582,7 +1583,7 @@ func TestHas(t *testing.T) {
 				})
 			},
 			wantMessages: []string{
-				`failed asserting JSON node "/key": error`,
+				`failed asserting that JSON node "/key": is URL: error`,
 			},
 		},
 		{
@@ -1647,7 +1648,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsTime().EqualTo(parseTime("2022-11-17T16:15:43+03:00"))
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is time equal to "2022-11-17T16:15:43+03:00", actual is "2022-10-16T15:14:32+03:00"`,
+				`failed asserting that JSON node "/key": is time equal to "2022-11-17T16:15:43+03:00", actual is "2022-10-16T15:14:32+03:00"`,
 			},
 		},
 		{
@@ -1664,7 +1665,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsTime().NotEqualTo(parseTime("2022-10-16T15:14:32+03:00"))
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is time not equal to "2022-10-16T15:14:32+03:00", actual is "2022-10-16T15:14:32+03:00"`,
+				`failed asserting that JSON node "/key": is time not equal to "2022-10-16T15:14:32+03:00", actual is "2022-10-16T15:14:32+03:00"`,
 			},
 		},
 		{
@@ -1681,7 +1682,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsTime().After(parseTime("2022-10-17T00:00:00+03:00"))
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is time after "2022-10-17T00:00:00+03:00", actual is "2022-10-16T15:14:32+03:00"`,
+				`failed asserting that JSON node "/key": is time after "2022-10-17T00:00:00+03:00", actual is "2022-10-16T15:14:32+03:00"`,
 			},
 		},
 		{
@@ -1698,7 +1699,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsTime().AfterOrEqualTo(parseTime("2022-10-16T15:14:33+03:00"))
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is time after or equal to "2022-10-16T15:14:33+03:00", actual is "2022-10-16T15:14:32+03:00"`,
+				`failed asserting that JSON node "/key": is time after or equal to "2022-10-16T15:14:33+03:00", actual is "2022-10-16T15:14:32+03:00"`,
 			},
 		},
 		{
@@ -1715,7 +1716,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsTime().Before(parseTime("2022-10-16T00:00:00+03:00"))
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is time before "2022-10-16T00:00:00+03:00", actual is "2022-10-16T15:14:32+03:00"`,
+				`failed asserting that JSON node "/key": is time before "2022-10-16T00:00:00+03:00", actual is "2022-10-16T15:14:32+03:00"`,
 			},
 		},
 		{
@@ -1732,7 +1733,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsTime().BeforeOrEqualTo(parseTime("2022-10-16T15:14:31+03:00"))
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is time before or equal to "2022-10-16T15:14:31+03:00", actual is "2022-10-16T15:14:32+03:00"`,
+				`failed asserting that JSON node "/key": is time before or equal to "2022-10-16T15:14:31+03:00", actual is "2022-10-16T15:14:32+03:00"`,
 			},
 		},
 		{
@@ -1766,7 +1767,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsDate().EqualToDate(2022, time.October, 15)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is time equal to "2022-10-15", actual is "2022-10-16"`,
+				`failed asserting that JSON node "/key": is time equal to "2022-10-15", actual is "2022-10-16"`,
 			},
 		},
 		{
@@ -1783,7 +1784,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsDate().NotEqualToDate(2022, time.October, 16)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is time not equal to "2022-10-16", actual is "2022-10-16"`,
+				`failed asserting that JSON node "/key": is time not equal to "2022-10-16", actual is "2022-10-16"`,
 			},
 		},
 		{
@@ -1800,7 +1801,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsDate().AfterDate(2022, time.October, 16)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is time after "2022-10-16", actual is "2022-10-16"`,
+				`failed asserting that JSON node "/key": is time after "2022-10-16", actual is "2022-10-16"`,
 			},
 		},
 		{
@@ -1817,7 +1818,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsDate().AfterOrEqualToDate(2022, time.October, 17)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is time after or equal to "2022-10-17", actual is "2022-10-16"`,
+				`failed asserting that JSON node "/key": is time after or equal to "2022-10-17", actual is "2022-10-16"`,
 			},
 		},
 		{
@@ -1834,7 +1835,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsDate().BeforeDate(2022, time.October, 16)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is time before "2022-10-16", actual is "2022-10-16"`,
+				`failed asserting that JSON node "/key": is time before "2022-10-16", actual is "2022-10-16"`,
 			},
 		},
 		{
@@ -1851,7 +1852,7 @@ func TestHas(t *testing.T) {
 				json.Node("/key").IsDate().BeforeOrEqualToDate(2022, time.October, 15)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is time before or equal to "2022-10-15", actual is "2022-10-16"`,
+				`failed asserting that JSON node "/key": is time before or equal to "2022-10-15", actual is "2022-10-16"`,
 			},
 		},
 		{
@@ -1896,7 +1897,7 @@ func TestHas(t *testing.T) {
 				})
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with JSON: data has invalid JSON: invalid character 'k' looking for beginning of object key string`,
+				`failed asserting that JSON node "/key": is string with JSON: data has invalid JSON: invalid character 'k' looking for beginning of object key string`,
 			},
 		},
 		{
@@ -1908,7 +1909,7 @@ func TestHas(t *testing.T) {
 				})
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with JSON: failed to find JSON node "/key": Object has no key 'key'`,
+				`failed asserting that JSON node "/key": is string with JSON: failed to find JSON node "/key": Object has no key 'key'`,
 			},
 		},
 		{
@@ -1920,7 +1921,7 @@ func TestHas(t *testing.T) {
 				})
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" is string`,
+				`failed asserting that JSON node "/key": is string with JSON: failed asserting that JSON node "/key" is string`,
 			},
 		},
 		{
@@ -1932,7 +1933,7 @@ func TestHas(t *testing.T) {
 				})
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" equal to "expected", actual is "value"`,
+				`failed asserting that JSON node "/key": is string with JSON: failed asserting that JSON node "/key": equal to "expected", actual is "value"`,
 			},
 		},
 		{
@@ -1944,7 +1945,7 @@ func TestHas(t *testing.T) {
 				})
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" is URL with hosts "example.net", actual is "example.com"`,
+				`failed asserting that JSON node "/key": is string with JSON: failed asserting that JSON node "/key": is URL with hosts "example.net", actual is "example.com"`,
 			},
 		},
 		{
@@ -1956,7 +1957,7 @@ func TestHas(t *testing.T) {
 				})
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" is time equal to "2022-10-15", actual is "2022-10-16"`,
+				`failed asserting that JSON node "/key": is string with JSON: failed asserting that JSON node "/key": is time equal to "2022-10-15", actual is "2022-10-16"`,
 			},
 		},
 		{
@@ -1968,7 +1969,7 @@ func TestHas(t *testing.T) {
 				})
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" is not nil UUID, actual is "00000000-0000-0000-0000-000000000000"`,
+				`failed asserting that JSON node "/key": is string with JSON: failed asserting that JSON node "/key": is not nil UUID, actual is "00000000-0000-0000-0000-000000000000"`,
 			},
 		},
 		{
@@ -1976,11 +1977,11 @@ func TestHas(t *testing.T) {
 			json: `{"key": "{\"key\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}"}`,
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node("/key").IsString().WithJSON(func(json *assertjson.AssertJSON) {
-					json.Node("/key").IsJWT(getJWTSecret).Algorithm("HS512")
+					json.Node("/key").IsJWT(getJWTSecret).WithAlgorithm("HS512")
 				})
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" is JWT with algorithm "HS512", actual is "HS256"`,
+				`failed asserting that JSON node "/key": is string with JSON: failed asserting that JSON node "/key": is JWT with algorithm "HS512", actual is "HS256"`,
 			},
 		},
 		{
@@ -1992,7 +1993,7 @@ func TestHas(t *testing.T) {
 				})
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" equal to 321.000000, actual is 123.000000`,
+				`failed asserting that JSON node "/key": is string with JSON: failed asserting that JSON node "/key": equal to 321.000000, actual is 123.000000`,
 			},
 		},
 		{
@@ -2004,7 +2005,7 @@ func TestHas(t *testing.T) {
 				})
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" equal to 321, actual is 123`,
+				`failed asserting that JSON node "/key": is string with JSON: failed asserting that JSON node "/key": equal to 321, actual is 123`,
 			},
 		},
 		{
@@ -2016,7 +2017,7 @@ func TestHas(t *testing.T) {
 				})
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" is array with length is 1, actual is 0`,
+				`failed asserting that JSON node "/key": is string with JSON: failed asserting that JSON node "/key": is array with length is 1, actual is 0`,
 			},
 		},
 		{
@@ -2028,7 +2029,7 @@ func TestHas(t *testing.T) {
 				})
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key" is object with properties count is 1, actual is 0`,
+				`failed asserting that JSON node "/key": is string with JSON: failed asserting that JSON node "/key": is object with properties count is 1, actual is 0`,
 			},
 		},
 		{
@@ -2042,7 +2043,7 @@ func TestHas(t *testing.T) {
 				})
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key/0" equal to "expected", actual is "value"`,
+				`failed asserting that JSON node "/key": is string with JSON: failed asserting that JSON node "/key/0": equal to "expected", actual is "value"`,
 			},
 		},
 		{
@@ -2056,7 +2057,7 @@ func TestHas(t *testing.T) {
 				})
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is string with JSON: failed asserting that JSON node "/key/key" equal to "expected", actual is "value"`,
+				`failed asserting that JSON node "/key": is string with JSON: failed asserting that JSON node "/key/key": equal to "expected", actual is "value"`,
 			},
 		},
 		{
@@ -2090,24 +2091,290 @@ func TestHas(t *testing.T) {
 			name: "JSON node is JWT with algorithm",
 			json: `{"key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"}`,
 			assert: func(json *assertjson.AssertJSON) {
-				json.Node("/key").IsJWT(getJWTSecret).Algorithm("HS256")
+				json.Node("/key").IsJWT(getJWTSecret).WithAlgorithm("HS256")
 			},
 		},
 		{
 			name: "JSON node is JWT with algorithm fails",
 			json: `{"key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"}`,
 			assert: func(json *assertjson.AssertJSON) {
-				json.Node("/key").IsJWT(getJWTSecret).Algorithm("HS512")
+				json.Node("/key").IsJWT(getJWTSecret).WithAlgorithm("HS512")
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is JWT with algorithm "HS512", actual is "HS256"`,
+				`failed asserting that JSON node "/key": is JWT with algorithm "HS512", actual is "HS256"`,
+			},
+		},
+		{
+			name: "JSON node is JWT with id",
+			json: jsonWithJWT(jwt.MapClaims{"jti": "12345"}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithID("12345")
+			},
+		},
+		{
+			name: "JSON node is JWT with id no field",
+			json: jsonWithJWT(jwt.MapClaims{}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithID("unexpected")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "": is JWT with id ("jti") "unexpected": field does not exist`,
+			},
+		},
+		{
+			name: "JSON node is JWT with id invalid type",
+			json: jsonWithJWT(jwt.MapClaims{"jti": 12345}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithID("unexpected")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "": is JWT with id ("jti") "unexpected": string is expected`,
+			},
+		},
+		{
+			name: "JSON node is JWT with id not equal",
+			json: jsonWithJWT(jwt.MapClaims{"jti": "12345"}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithID("unexpected")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "": is JWT with id ("jti") "unexpected", actual is "12345"`,
+			},
+		},
+		{
+			name: "JSON node is JWT with issuer",
+			json: jsonWithJWT(jwt.MapClaims{"iss": "expected"}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithIssuer("expected")
+			},
+		},
+		{
+			name: "JSON node is JWT with issuer no field",
+			json: jsonWithJWT(jwt.MapClaims{}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithIssuer("unexpected")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "": is JWT with issuer ("iss") "unexpected": field does not exist`,
+			},
+		},
+		{
+			name: "JSON node is JWT with issuer invalid type",
+			json: jsonWithJWT(jwt.MapClaims{"iss": 12345}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithIssuer("unexpected")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "": is JWT with issuer ("iss") "unexpected": string is expected`,
+			},
+		},
+		{
+			name: "JSON node is JWT with issuer not equal",
+			json: jsonWithJWT(jwt.MapClaims{"iss": "expected"}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithIssuer("unexpected")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "": is JWT with issuer ("iss") "unexpected", actual is "expected"`,
+			},
+		},
+		{
+			name: "JSON node is JWT with subject",
+			json: jsonWithJWT(jwt.MapClaims{"sub": "expected"}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithSubject("expected")
+			},
+		},
+		{
+			name: "JSON node is JWT with subject no field",
+			json: jsonWithJWT(jwt.MapClaims{}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithSubject("unexpected")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "": is JWT with subject ("sub") "unexpected": field does not exist`,
+			},
+		},
+		{
+			name: "JSON node is JWT with subject invalid type",
+			json: jsonWithJWT(jwt.MapClaims{"sub": 12345}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithSubject("unexpected")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "": is JWT with subject ("sub") "unexpected": string is expected`,
+			},
+		},
+		{
+			name: "JSON node is JWT with subject not equal",
+			json: jsonWithJWT(jwt.MapClaims{"sub": "expected"}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithSubject("unexpected")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "": is JWT with subject ("sub") "unexpected", actual is "expected"`,
+			},
+		},
+		{
+			name: "JSON node is JWT with audience",
+			json: jsonWithJWT(jwt.MapClaims{"aud": "expected"}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithAudience([]string{"expected"})
+			},
+		},
+		{
+			name: "JSON node is JWT with multiple audience",
+			json: jsonWithJWT(jwt.MapClaims{"aud": []string{"one", "two"}}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithAudience([]string{"one", "two"})
+			},
+		},
+		{
+			name: "JSON node is JWT with audience no field",
+			json: jsonWithJWT(jwt.MapClaims{}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithAudience([]string{"one", "two"})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "": is JWT with audience ("aud") ["one", "two"]: field does not exist`,
+			},
+		},
+		{
+			name: "JSON node is JWT with audience invalid type",
+			json: jsonWithJWT(jwt.MapClaims{"aud": 12345}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithAudience([]string{"unexpected"})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "": is JWT with audience ("aud") ["unexpected"]: string or array of strings expected`,
+			},
+		},
+		{
+			name: "JSON node is JWT with audience not equal",
+			json: jsonWithJWT(jwt.MapClaims{"aud": "expected"}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithAudience([]string{"unexpected"})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "": is JWT with audience ("aud") ["unexpected"], actual is ["expected"]`,
+			},
+		},
+		{
+			name: "JSON node is JWT with expires at",
+			json: jsonWithJWT(jwt.MapClaims{"exp": time.Now().Add(time.Hour).Unix()}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithExpiresAt()
+			},
+		},
+		{
+			name: "JSON node is JWT with expires at no field",
+			json: jsonWithJWT(jwt.MapClaims{}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithExpiresAt()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "": is JWT with expires at ("exp"): field does not exist`,
+			},
+		},
+		{
+			name: "JSON node is JWT with expires at invalid type",
+			json: jsonWithJWT(jwt.MapClaims{"exp": "string"}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithExpiresAt()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "" is JWT: Token is expired`,
+			},
+		},
+		{
+			name: "JSON node is JWT with expires at failed",
+			json: jsonWithJWT(jwt.MapClaims{"exp": parseTime("2100-01-01T00:00:00Z").Unix()}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithExpiresAt().AfterDate(2200, time.January, 1)
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "": is JWT with expires at ("exp"): is time after "2200-01-01T00:00:00Z", actual is "2100-01-01T03:00:00+03:00"`,
+			},
+		},
+		{
+			name: "JSON node is JWT with not before",
+			json: jsonWithJWT(jwt.MapClaims{"nbf": time.Now().Add(-time.Hour).Unix()}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithNotBefore()
+			},
+		},
+		{
+			name: "JSON node is JWT with not before no field",
+			json: jsonWithJWT(jwt.MapClaims{}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithNotBefore()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "": is JWT with not before ("nbf"): field does not exist`,
+			},
+		},
+		{
+			name: "JSON node is JWT with not before invalid type",
+			json: jsonWithJWT(jwt.MapClaims{"nbf": "string"}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithNotBefore()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "" is JWT: Token is not valid yet`,
+			},
+		},
+		{
+			name: "JSON node is JWT with not before failed",
+			json: jsonWithJWT(jwt.MapClaims{"nbf": parseTime("2000-01-01T00:00:00Z").Unix()}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithNotBefore().AfterDate(2001, time.January, 1)
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "": is JWT with not before ("nbf"): is time after "2001-01-01T00:00:00Z", actual is "2000-01-01T03:00:00+03:00"`,
+			},
+		},
+		{
+			name: "JSON node is JWT with issued at",
+			json: jsonWithJWT(jwt.MapClaims{"iat": time.Now().Add(-time.Hour).Unix()}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithIssuedAt()
+			},
+		},
+		{
+			name: "JSON node is JWT with issued at no field",
+			json: jsonWithJWT(jwt.MapClaims{}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithIssuedAt()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "": is JWT with issued at ("iat"): field does not exist`,
+			},
+		},
+		{
+			name: "JSON node is JWT with issued at invalid type",
+			json: jsonWithJWT(jwt.MapClaims{"iat": "string"}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithIssuedAt()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "" is JWT: Token used before issued`,
+			},
+		},
+		{
+			name: "JSON node is JWT with issued at failed",
+			json: jsonWithJWT(jwt.MapClaims{"iat": parseTime("2000-01-01T00:00:00Z").Unix()}),
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("").IsJWT(getJWTSecret).WithIssuedAt().AfterDate(2001, time.January, 1)
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "": is JWT with issued at ("iat"): is time after "2001-01-01T00:00:00Z", actual is "2000-01-01T03:00:00+03:00"`,
 			},
 		},
 		{
 			name: "JSON node is JWT with header",
 			json: `{"key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"}`,
 			assert: func(json *assertjson.AssertJSON) {
-				json.Node("/key").IsJWT(getJWTSecret).Header(func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsJWT(getJWTSecret).WithHeader(func(json *assertjson.AssertJSON) {
 					json.Node("/alg").IsString().EqualTo("HS256")
 				})
 			},
@@ -2116,19 +2383,19 @@ func TestHas(t *testing.T) {
 			name: "JSON node is JWT with header fails",
 			json: `{"key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"}`,
 			assert: func(json *assertjson.AssertJSON) {
-				json.Node("/key").IsJWT(getJWTSecret).Header(func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsJWT(getJWTSecret).WithHeader(func(json *assertjson.AssertJSON) {
 					json.Node("/alg").IsString().EqualTo("HS512")
 				})
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is JWT with header: failed asserting that JSON node "/alg" equal to "HS512", actual is "HS256"`,
+				`failed asserting that JSON node "/key": is JWT with header: failed asserting that JSON node "/alg": equal to "HS512", actual is "HS256"`,
 			},
 		},
 		{
 			name: "JSON node is JWT with payload",
 			json: `{"key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"}`,
 			assert: func(json *assertjson.AssertJSON) {
-				json.Node("/key").IsJWT(getJWTSecret).Payload(func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsJWT(getJWTSecret).WithPayload(func(json *assertjson.AssertJSON) {
 					json.Node("/name").IsString().EqualTo("John Doe")
 				})
 			},
@@ -2137,12 +2404,12 @@ func TestHas(t *testing.T) {
 			name: "JSON node is JWT with payload fails",
 			json: `{"key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"}`,
 			assert: func(json *assertjson.AssertJSON) {
-				json.Node("/key").IsJWT(getJWTSecret).Payload(func(json *assertjson.AssertJSON) {
+				json.Node("/key").IsJWT(getJWTSecret).WithPayload(func(json *assertjson.AssertJSON) {
 					json.Node("/name").IsString().EqualTo("John Smith")
 				})
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "/key" is JWT with payload: failed asserting that JSON node "/name" equal to "John Smith", actual is "John Doe"`,
+				`failed asserting that JSON node "/key": is JWT with payload: failed asserting that JSON node "/name": equal to "John Smith", actual is "John Doe"`,
 			},
 		},
 	}
@@ -2179,8 +2446,25 @@ func TestAssertNode_Exists(t *testing.T) {
 	}
 }
 
+const tokenSecret = "your-256-bit-secret"
+
 func getJWTSecret(token *jwt.Token) (interface{}, error) {
-	return []byte("your-256-bit-secret"), nil
+	return []byte(tokenSecret), nil
+}
+
+func jsonWithJWT(claims jwt.MapClaims) string {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	s, err := token.SignedString([]byte(tokenSecret))
+	if err != nil {
+		panic(err)
+	}
+
+	j, err := json.Marshal(s)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(j)
 }
 
 func parseTime(s string) time.Time {

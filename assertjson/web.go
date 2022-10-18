@@ -27,11 +27,7 @@ func (a *StringAssertion) WithEmail(msgAndArgs ...interface{}) *StringAssertion 
 	a.t.Helper()
 	if !is.Email(a.value) {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is email, actual is "%s"`,
-				a.path,
-				a.value,
-			),
+			fmt.Sprintf(`is email, actual is "%s"`, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -55,11 +51,7 @@ func (a *StringAssertion) WithHTML5Email(msgAndArgs ...interface{}) *StringAsser
 	a.t.Helper()
 	if !is.HTML5Email(a.value) {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is email (HTML5 format), actual is "%s"`,
-				a.path,
-				a.value,
-			),
+			fmt.Sprintf(`is email (HTML5 format), actual is "%s"`, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -84,14 +76,7 @@ func (a *StringAssertion) WithURL(msgAndArgs ...interface{}) *URLAssertion {
 		return &URLAssertion{t: a.t, message: a.message, path: a.path, url: u}
 	}
 
-	a.fail(
-		fmt.Sprintf(
-			`failed asserting that JSON node "%s" is URL, actual is "%s"`,
-			a.path,
-			a.value,
-		),
-		msgAndArgs...,
-	)
+	a.fail(fmt.Sprintf(`is URL, actual is "%s"`, a.value), msgAndArgs...)
 
 	return nil
 }
@@ -119,8 +104,7 @@ func (a *URLAssertion) WithSchemas(schemas ...string) *URLAssertion {
 
 	a.fail(
 		fmt.Sprintf(
-			`failed asserting that JSON node "%s" is URL with schemas %s, actual is "%s"`,
-			a.path,
+			`is URL with schemas %s, actual is "%s"`,
 			strings.Join(quoteAll(schemas), ", "),
 			a.url.Scheme,
 		),
@@ -144,8 +128,7 @@ func (a *URLAssertion) WithHosts(hosts ...string) *URLAssertion {
 
 	a.fail(
 		fmt.Sprintf(
-			`failed asserting that JSON node "%s" is URL with hosts %s, actual is "%s"`,
-			a.path,
+			`is URL with hosts %s, actual is "%s"`,
 			strings.Join(quoteAll(hosts), ", "),
 			a.url.Host,
 		),
@@ -161,14 +144,7 @@ func (a *URLAssertion) That(f func(u *url.URL) error, msgAndArgs ...interface{})
 	}
 	a.t.Helper()
 	if err := f(a.url); err != nil {
-		a.fail(
-			fmt.Sprintf(
-				`failed asserting JSON node "%s": %s`,
-				a.path,
-				err.Error(),
-			),
-			msgAndArgs...,
-		)
+		a.fail(`is URL: `+err.Error(), msgAndArgs...)
 	}
 
 	return a
@@ -176,8 +152,5 @@ func (a *URLAssertion) That(f func(u *url.URL) error, msgAndArgs ...interface{})
 
 func (a *URLAssertion) fail(message string, msgAndArgs ...interface{}) {
 	a.t.Helper()
-	if a.message != "" {
-		message = a.message + ": " + message
-	}
-	assert.Fail(a.t, message, msgAndArgs...)
+	assert.Fail(a.t, a.message+message, msgAndArgs...)
 }

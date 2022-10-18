@@ -79,8 +79,7 @@ func (a *TimeAssertion) EqualTo(expected time.Time, msgAndArgs ...interface{}) *
 	if !a.value.Equal(expected) {
 		a.fail(
 			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is time equal to "%s", actual is "%s"`,
-				a.path,
+				`is time equal to "%s", actual is "%s"`,
 				expected.Format(a.layout),
 				a.value.Format(a.layout),
 			),
@@ -101,8 +100,7 @@ func (a *TimeAssertion) NotEqualTo(expected time.Time, msgAndArgs ...interface{}
 	if a.value.Equal(expected) {
 		a.fail(
 			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is time not equal to "%s", actual is "%s"`,
-				a.path,
+				`is time not equal to "%s", actual is "%s"`,
 				expected.Format(a.layout),
 				a.value.Format(a.layout),
 			),
@@ -123,8 +121,7 @@ func (a *TimeAssertion) After(expected time.Time, msgAndArgs ...interface{}) *Ti
 	if !a.value.After(expected) {
 		a.fail(
 			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is time after "%s", actual is "%s"`,
-				a.path,
+				`is time after "%s", actual is "%s"`,
 				expected.Format(a.layout),
 				a.value.Format(a.layout),
 			),
@@ -145,8 +142,7 @@ func (a *TimeAssertion) AfterOrEqualTo(expected time.Time, msgAndArgs ...interfa
 	if !a.value.After(expected) && !a.value.Equal(expected) {
 		a.fail(
 			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is time after or equal to "%s", actual is "%s"`,
-				a.path,
+				`is time after or equal to "%s", actual is "%s"`,
 				expected.Format(a.layout),
 				a.value.Format(a.layout),
 			),
@@ -167,8 +163,7 @@ func (a *TimeAssertion) Before(expected time.Time, msgAndArgs ...interface{}) *T
 	if !a.value.Before(expected) {
 		a.fail(
 			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is time before "%s", actual is "%s"`,
-				a.path,
+				`is time before "%s", actual is "%s"`,
 				expected.Format(a.layout),
 				a.value.Format(a.layout),
 			),
@@ -189,8 +184,7 @@ func (a *TimeAssertion) BeforeOrEqualTo(expected time.Time, msgAndArgs ...interf
 	if !a.value.Before(expected) && !a.value.Equal(expected) {
 		a.fail(
 			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is time before or equal to "%s", actual is "%s"`,
-				a.path,
+				`is time before or equal to "%s", actual is "%s"`,
 				expected.Format(a.layout),
 				a.value.Format(a.layout),
 			),
@@ -255,10 +249,7 @@ func (node *AssertNode) TimeWithLayout(layout string) time.Time {
 
 func (a *TimeAssertion) fail(message string, msgAndArgs ...interface{}) {
 	a.t.Helper()
-	if a.message != "" {
-		message = a.message + ": " + message
-	}
-	assert.Fail(a.t, message, msgAndArgs...)
+	assert.Fail(a.t, a.message+message, msgAndArgs...)
 }
 
 func newDate(year int, month time.Month, day int) time.Time {

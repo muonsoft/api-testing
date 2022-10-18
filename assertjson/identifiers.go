@@ -52,11 +52,7 @@ func (a *UUIDAssertion) Nil(msgAndArgs ...interface{}) *UUIDAssertion {
 	a.t.Helper()
 	if !a.value.IsNil() {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is nil UUID, actual is "%s"`,
-				a.path,
-				a.value,
-			),
+			fmt.Sprintf(`is nil UUID, actual is "%s"`, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -72,11 +68,7 @@ func (a *UUIDAssertion) NotNil(msgAndArgs ...interface{}) *UUIDAssertion {
 	a.t.Helper()
 	if a.value.IsNil() {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is not nil UUID, actual is "%s"`,
-				a.path,
-				a.value,
-			),
+			fmt.Sprintf(`is not nil UUID, actual is "%s"`, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -92,12 +84,7 @@ func (a *UUIDAssertion) Version(version byte, msgAndArgs ...interface{}) *UUIDAs
 	a.t.Helper()
 	if a.value.Version() != version {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is UUID of version %d, actual is %d`,
-				a.path,
-				version,
-				a.value.Version(),
-			),
+			fmt.Sprintf(`is UUID of version %d, actual is %d`, version, a.value.Version()),
 			msgAndArgs...,
 		)
 	}
@@ -113,12 +100,7 @@ func (a *UUIDAssertion) Variant(variant byte, msgAndArgs ...interface{}) *UUIDAs
 	a.t.Helper()
 	if a.value.Variant() != variant {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is UUID of variant %d, actual is %d`,
-				a.path,
-				variant,
-				a.value.Variant(),
-			),
+			fmt.Sprintf(`is UUID of variant %d, actual is %d`, variant, a.value.Variant()),
 			msgAndArgs...,
 		)
 	}
@@ -134,12 +116,7 @@ func (a *UUIDAssertion) EqualTo(expected uuid.UUID, msgAndArgs ...interface{}) *
 	a.t.Helper()
 	if a.value != expected {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is UUID equal to "%s", actual is "%s"`,
-				a.path,
-				expected,
-				a.value,
-			),
+			fmt.Sprintf(`is UUID equal to "%s", actual is "%s"`, expected, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -155,12 +132,7 @@ func (a *UUIDAssertion) NotEqualTo(expected uuid.UUID, msgAndArgs ...interface{}
 	a.t.Helper()
 	if a.value == expected {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is UUID not equal to "%s", actual is "%s"`,
-				a.path,
-				expected,
-				a.value,
-			),
+			fmt.Sprintf(`is UUID not equal to "%s", actual is "%s"`, expected, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -186,8 +158,5 @@ func (node *AssertNode) UUID() uuid.UUID {
 
 func (a *UUIDAssertion) fail(message string, msgAndArgs ...interface{}) {
 	a.t.Helper()
-	if a.message != "" {
-		message = a.message + ": " + message
-	}
-	assert.Fail(a.t, message, msgAndArgs...)
+	assert.Fail(a.t, a.message+message, msgAndArgs...)
 }

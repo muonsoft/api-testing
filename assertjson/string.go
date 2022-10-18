@@ -17,7 +17,12 @@ func (node *AssertNode) IsString(msgAndArgs ...interface{}) *StringAssertion {
 	node.t.Helper()
 	if node.exists() {
 		if s, ok := node.value.(string); ok {
-			return &StringAssertion{t: node.t, message: node.message, path: node.Path(), value: s}
+			return &StringAssertion{
+				t:       node.t,
+				message: fmt.Sprintf(`%sfailed asserting that JSON node "%s": `, node.message, node.Path()),
+				path:    node.Path(),
+				value:   s,
+			}
 		}
 		node.fail(
 			fmt.Sprintf(`failed asserting that JSON node "%s" is string`, node.Path()),
@@ -96,12 +101,7 @@ func (a *StringAssertion) EqualTo(expectedValue string, msgAndArgs ...interface{
 	a.t.Helper()
 	if a.value != expectedValue {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" equal to "%s", actual is "%s"`,
-				a.path,
-				expectedValue,
-				a.value,
-			),
+			fmt.Sprintf(`equal to "%s", actual is "%s"`, expectedValue, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -117,12 +117,7 @@ func (a *StringAssertion) NotEqualTo(expectedValue string, msgAndArgs ...interfa
 	a.t.Helper()
 	if a.value == expectedValue {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" not equal to "%s", actual is "%s"`,
-				a.path,
-				expectedValue,
-				a.value,
-			),
+			fmt.Sprintf(`not equal to "%s", actual is "%s"`, expectedValue, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -139,12 +134,7 @@ func (a *StringAssertion) EqualToOneOf(expectedValues ...string) *StringAssertio
 
 	if !isOneOf(a.value, expectedValues) {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" equal to one of values (%s), actual is "%s"`,
-				a.path,
-				formatStrings(expectedValues),
-				a.value,
-			),
+			fmt.Sprintf(`equal to one of values (%s), actual is "%s"`, formatStrings(expectedValues), a.value),
 		)
 	}
 
@@ -159,12 +149,7 @@ func (a *StringAssertion) Matches(regexp interface{}, msgAndArgs ...interface{})
 	a.t.Helper()
 	if !matchRegexp(regexp, a.value) {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" matches "%v", actual is "%s"`,
-				a.path,
-				regexp,
-				a.value,
-			),
+			fmt.Sprintf(`matches "%v", actual is "%s"`, regexp, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -180,12 +165,7 @@ func (a *StringAssertion) NotMatches(regexp interface{}, msgAndArgs ...interface
 	a.t.Helper()
 	if matchRegexp(regexp, a.value) {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" not matches "%v", actual is "%s"`,
-				a.path,
-				regexp,
-				a.value,
-			),
+			fmt.Sprintf(`not matches "%v", actual is "%s"`, regexp, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -201,12 +181,7 @@ func (a *StringAssertion) Contains(value string, msgAndArgs ...interface{}) *Str
 	a.t.Helper()
 	if !strings.Contains(a.value, value) {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" contains "%s", actual is "%s"`,
-				a.path,
-				value,
-				a.value,
-			),
+			fmt.Sprintf(`contains "%s", actual is "%s"`, value, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -222,12 +197,7 @@ func (a *StringAssertion) NotContains(value string, msgAndArgs ...interface{}) *
 	a.t.Helper()
 	if strings.Contains(a.value, value) {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" not contains "%s", actual is "%s"`,
-				a.path,
-				value,
-				a.value,
-			),
+			fmt.Sprintf(`not contains "%s", actual is "%s"`, value, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -245,12 +215,7 @@ func (a *StringAssertion) WithLength(length int, msgAndArgs ...interface{}) *Str
 	actual := utf8.RuneCountInString(a.value)
 	if actual != length {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is string with length is %d, actual is %d`,
-				a.path,
-				length,
-				actual,
-			),
+			fmt.Sprintf(`is string with length is %d, actual is %d`, length, actual),
 			msgAndArgs...,
 		)
 	}
@@ -268,12 +233,7 @@ func (a *StringAssertion) WithLengthGreaterThan(expected int, msgAndArgs ...inte
 	length := utf8.RuneCountInString(a.value)
 	if length <= expected {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is string with length greater than %d, actual is %d`,
-				a.path,
-				expected,
-				length,
-			),
+			fmt.Sprintf(`is string with length greater than %d, actual is %d`, expected, length),
 			msgAndArgs...,
 		)
 	}
@@ -292,12 +252,7 @@ func (a *StringAssertion) WithLengthGreaterThanOrEqual(expected int, msgAndArgs 
 	length := utf8.RuneCountInString(a.value)
 	if length < expected {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is string with length greater than or equal to %d, actual is %d`,
-				a.path,
-				expected,
-				length,
-			),
+			fmt.Sprintf(`is string with length greater than or equal to %d, actual is %d`, expected, length),
 			msgAndArgs...,
 		)
 	}
@@ -315,12 +270,7 @@ func (a *StringAssertion) WithLengthLessThan(expected int, msgAndArgs ...interfa
 	length := utf8.RuneCountInString(a.value)
 	if length >= expected {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is string with length less than %d, actual is %d`,
-				a.path,
-				expected,
-				length,
-			),
+			fmt.Sprintf(`is string with length less than %d, actual is %d`, expected, length),
 			msgAndArgs...,
 		)
 	}
@@ -339,12 +289,7 @@ func (a *StringAssertion) WithLengthLessThanOrEqual(expected int, msgAndArgs ...
 	length := utf8.RuneCountInString(a.value)
 	if length > expected {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is string with length less than or equal to %d, actual is %d`,
-				a.path,
-				expected,
-				length,
-			),
+			fmt.Sprintf(`is string with length less than or equal to %d, actual is %d`, expected, length),
 			msgAndArgs...,
 		)
 	}
@@ -386,10 +331,7 @@ func (a *StringAssertion) Assert(assertFunc func(tb testing.TB, value string)) *
 
 func (a *StringAssertion) fail(message string, msgAndArgs ...interface{}) {
 	a.t.Helper()
-	if a.message != "" {
-		message = a.message + ": " + message
-	}
-	assert.Fail(a.t, message, msgAndArgs...)
+	assert.Fail(a.t, a.message+message, msgAndArgs...)
 }
 
 // matchRegexp return true if a specified regexp matches a string.
@@ -402,6 +344,20 @@ func matchRegexp(rx interface{}, s string) bool {
 	}
 
 	return r.FindStringIndex(s) != nil
+}
+
+func areStringsEqual(s1, s2 []string) bool {
+	if len(s1) != len(s2) {
+		return false
+	}
+
+	for i, s := range s1 {
+		if s != s2[i] {
+			return false
+		}
+	}
+
+	return true
 }
 
 func isOneOf(s string, ss []string) bool {
@@ -425,4 +381,8 @@ func formatStrings(ss []string) string {
 	}
 
 	return b.String()
+}
+
+func wrapArray(s string) string {
+	return "[" + s + "]"
 }

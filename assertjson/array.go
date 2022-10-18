@@ -22,7 +22,12 @@ func (node *AssertNode) IsArray(msgAndArgs ...interface{}) *ArrayAssertion {
 	node.t.Helper()
 	if node.exists() {
 		if array, ok := node.value.([]interface{}); ok {
-			return &ArrayAssertion{t: node.t, message: node.message, path: node.Path(), value: array}
+			return &ArrayAssertion{
+				t:       node.t,
+				message: fmt.Sprintf(`%sfailed asserting that JSON node "%s": `, node.message, node.Path()),
+				path:    node.Path(),
+				value:   array,
+			}
 		}
 		node.fail(
 			fmt.Sprintf(`failed asserting that JSON node "%s" is array`, node.Path()),
@@ -51,8 +56,7 @@ func (a *ArrayAssertion) WithLength(expected int, msgAndArgs ...interface{}) *Ar
 	if len(a.value) != expected {
 		a.fail(
 			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is array with length is %d, actual is %d`,
-				a.path,
+				`is array with length is %d, actual is %d`,
 				expected,
 				len(a.value),
 			),
@@ -73,8 +77,7 @@ func (a *ArrayAssertion) WithLengthGreaterThan(expected int, msgAndArgs ...inter
 	if len(a.value) <= expected {
 		a.fail(
 			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is array with length greater than %d, actual is %d`,
-				a.path,
+				`is array with length greater than %d, actual is %d`,
 				expected,
 				len(a.value),
 			),
@@ -96,8 +99,7 @@ func (a *ArrayAssertion) WithLengthGreaterThanOrEqual(expected int, msgAndArgs .
 	if len(a.value) < expected {
 		a.fail(
 			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is array with length greater than or equal to %d, actual is %d`,
-				a.path,
+				`is array with length greater than or equal to %d, actual is %d`,
 				expected,
 				len(a.value),
 			),
@@ -118,8 +120,7 @@ func (a *ArrayAssertion) WithLengthLessThan(expected int, msgAndArgs ...interfac
 	if len(a.value) >= expected {
 		a.fail(
 			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is array with length less than %d, actual is %d`,
-				a.path,
+				`is array with length less than %d, actual is %d`,
 				expected,
 				len(a.value),
 			),
@@ -141,8 +142,7 @@ func (a *ArrayAssertion) WithLengthLessThanOrEqual(expected int, msgAndArgs ...i
 	if len(a.value) > expected {
 		a.fail(
 			fmt.Sprintf(
-				`failed asserting that JSON node "%s" is array with length less than or equal to %d, actual is %d`,
-				a.path,
+				`is array with length less than or equal to %d, actual is %d`,
 				expected,
 				len(a.value),
 			),
@@ -209,10 +209,7 @@ func (a *ArrayAssertion) Length() int {
 
 func (a *ArrayAssertion) fail(message string, msgAndArgs ...interface{}) {
 	a.t.Helper()
-	if a.message != "" {
-		message = a.message + ": " + message
-	}
-	assert.Fail(a.t, message, msgAndArgs...)
+	assert.Fail(a.t, a.message+message, msgAndArgs...)
 }
 
 // ArrayLength asserts that JSON node is array and return its length.

@@ -28,7 +28,12 @@ func (node *AssertNode) IsInteger(msgAndArgs ...interface{}) *IntegerAssertion {
 			)
 			return nil
 		}
-		return &IntegerAssertion{t: node.t, message: node.message, path: node.Path(), value: int(float)}
+		return &IntegerAssertion{
+			t:       node.t,
+			message: fmt.Sprintf(`%sfailed asserting that JSON node "%s": `, node.message, node.Path()),
+			path:    node.Path(),
+			value:   int(float),
+		}
 	}
 
 	return nil
@@ -47,7 +52,12 @@ func (node *AssertNode) IsNumber(msgAndArgs ...interface{}) *NumberAssertion {
 	node.t.Helper()
 	if node.exists() {
 		if f, ok := node.value.(float64); ok {
-			return &NumberAssertion{t: node.t, message: node.message, path: node.Path(), value: f}
+			return &NumberAssertion{
+				t:       node.t,
+				message: fmt.Sprintf(`%sfailed asserting that JSON node "%s": `, node.message, node.Path()),
+				path:    node.Path(),
+				value:   f,
+			}
 		}
 		node.fail(
 			fmt.Sprintf(`value at path "%s" is not a number`, node.Path()),
@@ -125,12 +135,7 @@ func (a *NumberAssertion) EqualTo(expected float64, msgAndArgs ...interface{}) *
 
 	if a.value != expected {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" equal to %f, actual is %f`,
-				a.path,
-				expected,
-				a.value,
-			),
+			fmt.Sprintf(`equal to %f, actual is %f`, expected, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -147,12 +152,7 @@ func (a *NumberAssertion) NotEqualTo(expected float64, msgAndArgs ...interface{}
 
 	if a.value == expected {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" not equal to %f, actual is %f`,
-				a.path,
-				expected,
-				a.value,
-			),
+			fmt.Sprintf(`not equal to %f, actual is %f`, expected, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -170,13 +170,7 @@ func (a *NumberAssertion) EqualToWithDelta(expected, delta float64, msgAndArgs .
 	dt := a.value - expected
 	if dt < -delta || dt > delta {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" equal to %f with delta %f, actual is %f`,
-				a.path,
-				expected,
-				delta,
-				a.value,
-			),
+			fmt.Sprintf(`equal to %f with delta %f, actual is %f`, expected, delta, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -193,12 +187,7 @@ func (a *NumberAssertion) GreaterThan(expected float64, msgAndArgs ...interface{
 
 	if a.value <= expected {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" greater than %f, actual is %f`,
-				a.path,
-				expected,
-				a.value,
-			),
+			fmt.Sprintf(`greater than %f, actual is %f`, expected, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -215,12 +204,7 @@ func (a *NumberAssertion) GreaterThanOrEqual(expected float64, msgAndArgs ...int
 
 	if a.value < expected {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" greater than or equal %f, actual is %f`,
-				a.path,
-				expected,
-				a.value,
-			),
+			fmt.Sprintf(`greater than or equal %f, actual is %f`, expected, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -237,12 +221,7 @@ func (a *NumberAssertion) LessThan(expected float64, msgAndArgs ...interface{}) 
 
 	if a.value >= expected {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" less than %f, actual is %f`,
-				a.path,
-				expected,
-				a.value,
-			),
+			fmt.Sprintf(`less than %f, actual is %f`, expected, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -259,12 +238,7 @@ func (a *NumberAssertion) LessThanOrEqual(expected float64, msgAndArgs ...interf
 
 	if a.value > expected {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" less than or equal %f, actual is %f`,
-				a.path,
-				expected,
-				a.value,
-			),
+			fmt.Sprintf(`less than or equal %f, actual is %f`, expected, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -274,10 +248,7 @@ func (a *NumberAssertion) LessThanOrEqual(expected float64, msgAndArgs ...interf
 
 func (a *NumberAssertion) fail(message string, msgAndArgs ...interface{}) {
 	a.t.Helper()
-	if a.message != "" {
-		message = a.message + ": " + message
-	}
-	assert.Fail(a.t, message, msgAndArgs...)
+	assert.Fail(a.t, a.message+message, msgAndArgs...)
 }
 
 // IntegerAssertion is used to build a chain of assertions for the integer node.
@@ -297,12 +268,7 @@ func (a *IntegerAssertion) EqualTo(expected int, msgAndArgs ...interface{}) *Int
 
 	if a.value != expected {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" equal to %d, actual is %d`,
-				a.path,
-				expected,
-				a.value,
-			),
+			fmt.Sprintf(`equal to %d, actual is %d`, expected, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -319,12 +285,7 @@ func (a *IntegerAssertion) NotEqualTo(expected int, msgAndArgs ...interface{}) *
 
 	if a.value == expected {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" not equal to %d, actual is %d`,
-				a.path,
-				expected,
-				a.value,
-			),
+			fmt.Sprintf(`not equal to %d, actual is %d`, expected, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -341,12 +302,7 @@ func (a *IntegerAssertion) GreaterThan(expected int, msgAndArgs ...interface{}) 
 
 	if a.value <= expected {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" greater than %d, actual is %d`,
-				a.path,
-				expected,
-				a.value,
-			),
+			fmt.Sprintf(`greater than %d, actual is %d`, expected, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -363,12 +319,7 @@ func (a *IntegerAssertion) GreaterThanOrEqual(expected int, msgAndArgs ...interf
 
 	if a.value < expected {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" greater than or equal %d, actual is %d`,
-				a.path,
-				expected,
-				a.value,
-			),
+			fmt.Sprintf(`greater than or equal %d, actual is %d`, expected, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -385,12 +336,7 @@ func (a *IntegerAssertion) LessThan(expected int, msgAndArgs ...interface{}) *In
 
 	if a.value >= expected {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" less than %d, actual is %d`,
-				a.path,
-				expected,
-				a.value,
-			),
+			fmt.Sprintf(`less than %d, actual is %d`, expected, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -407,12 +353,7 @@ func (a *IntegerAssertion) LessThanOrEqual(expected int, msgAndArgs ...interface
 
 	if a.value > expected {
 		a.fail(
-			fmt.Sprintf(
-				`failed asserting that JSON node "%s" less than or equal %d, actual is %d`,
-				a.path,
-				expected,
-				a.value,
-			),
+			fmt.Sprintf(`less than or equal %d, actual is %d`, expected, a.value),
 			msgAndArgs...,
 		)
 	}
@@ -422,8 +363,5 @@ func (a *IntegerAssertion) LessThanOrEqual(expected int, msgAndArgs ...interface
 
 func (a *IntegerAssertion) fail(message string, msgAndArgs ...interface{}) {
 	a.t.Helper()
-	if a.message != "" {
-		message = a.message + ": " + message
-	}
-	assert.Fail(a.t, message, msgAndArgs...)
+	assert.Fail(a.t, a.message+message, msgAndArgs...)
 }
