@@ -207,6 +207,8 @@ func TestFileHas(t *testing.T) {
 }
 
 func TestHas(t *testing.T) {
+	time.Local = time.UTC
+
 	tests := []struct {
 		name         string
 		json         string
@@ -2293,7 +2295,7 @@ func TestHas(t *testing.T) {
 				json.Node("").IsJWT(getJWTSecret).WithExpiresAt().AfterDate(2200, time.January, 1)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "": is JWT with expires at ("exp"): is time after "2200-01-01T00:00:00Z", actual is "2100-01-01T03:00:00+03:00"`,
+				`failed asserting that JSON node "": is JWT with expires at ("exp"): is time after "2200-01-01T00:00:00Z", actual is "2100-01-01T00:00:00Z"`,
 			},
 		},
 		{
@@ -2330,7 +2332,7 @@ func TestHas(t *testing.T) {
 				json.Node("").IsJWT(getJWTSecret).WithNotBefore().AfterDate(2001, time.January, 1)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "": is JWT with not before ("nbf"): is time after "2001-01-01T00:00:00Z", actual is "2000-01-01T03:00:00+03:00"`,
+				`failed asserting that JSON node "": is JWT with not before ("nbf"): is time after "2001-01-01T00:00:00Z", actual is "2000-01-01T00:00:00Z"`,
 			},
 		},
 		{
@@ -2367,7 +2369,7 @@ func TestHas(t *testing.T) {
 				json.Node("").IsJWT(getJWTSecret).WithIssuedAt().AfterDate(2001, time.January, 1)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "": is JWT with issued at ("iat"): is time after "2001-01-01T00:00:00Z", actual is "2000-01-01T03:00:00+03:00"`,
+				`failed asserting that JSON node "": is JWT with issued at ("iat"): is time after "2001-01-01T00:00:00Z", actual is "2000-01-01T00:00:00Z"`,
 			},
 		},
 		{
