@@ -13,7 +13,7 @@
   "url": "https://example.com",
   "time": "2022-10-16T15:14:32+03:00",
   "date": "2022-10-16",
-  "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+  "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiaHR0cHM6Ly9hdWRpZW5jZTEuZXhhbXBsZS5jb20iLCJodHRwczovL2F1ZGllbmNlMi5leGFtcGxlLmNvbSJdLCJleHAiOjQ4MjAzNjAxMzEsImlhdCI6MTY2Njc1NjUzMSwiaXNzIjoiaHR0cHM6Ly9pc3N1ZXIuZXhhbXBsZS5jb20iLCJqdGkiOiJhYmMxMjM0NSIsIm5hbWUiOiJKb2huIERvZSIsIm5iZiI6MTY2Njc1NjUzMSwic3ViIjoiaHR0cHM6Ly9zdWJqZWN0LmV4YW1wbGUuY29tIn0.fGUvIn-BV8bPKkZdrxUneew3_qBe-knptL9a_TkNA4M",
   "arrayNode": [
     "arrayValue"
   ],

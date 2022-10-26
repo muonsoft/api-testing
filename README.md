@@ -134,25 +134,13 @@ func TestYourAPI(t *testing.T) {
 
         // string values assertions
         json.Node("/uuid").IsString().WithUUID()
-        json.Node("/uuid").IsUUID().NotNil().Version(4).Variant(1)
+        json.Node("/uuid").IsUUID().IsNotNil().OfVersion(4).OfVariant(1)
         json.Node("/uuid").IsUUID().EqualTo(uuid.FromStringOrNil("23e98a0c-26c8-410f-978f-d1d67228af87"))
         json.Node("/uuid").IsUUID().NotEqualTo(uuid.FromStringOrNil("a54cbd42-b30c-4619-b89a-47375734d49c"))
-        json.Node("/nilUUID").IsUUID().Nil()
+        json.Node("/nilUUID").IsUUID().IsNil()
         json.Node("/email").IsEmail()
         json.Node("/email").IsHTML5Email()
         json.Node("/url").IsURL().WithSchemas("https").WithHosts("example.com")
-        json.Node("/jwt").
-            IsJWT(func(token *jwt.Token) (interface{}, error) {
-                return []byte("your-256-bit-secret"), nil
-            }).
-            Algorithm("HS256").
-            Header(func(json *assertjson.AssertJSON) {
-                json.Node("/alg").IsString().EqualTo("HS256")
-                json.Node("/typ").IsString().EqualTo("JWT")
-            }).
-            Payload(func(json *assertjson.AssertJSON) {
-                json.Node("/name").IsString().EqualTo("John Doe")
-            })
 
         // time assertions
         json.Node("/time").IsTime().EqualTo(time.Date(2022, time.October, 16, 12, 14, 32, 0, time.UTC))
@@ -203,6 +191,31 @@ func TestYourAPI(t *testing.T) {
         // complex assertions
         json.At("/complexNode").Node("/items/1/key").IsString().EqualTo("value")
         json.Atf("/complexNode/%s", "items").Node("/1/key").IsString().EqualTo("value")
+    
+        // JSON Web Token (JWT) assertion
+        isJWT := json.Node("/jwt").IsJWT(func(token *jwt.Token) (interface{}, error) {
+            return []byte("your-256-bit-secret"), nil
+        })
+        isJWT.
+            WithAlgorithm("HS256").
+            // standard claims assertions
+            WithID("abc12345").
+            WithIssuer("https://issuer.example.com").
+            WithSubject("https://subject.example.com").
+            WithAudience([]string{"https://audience1.example.com", "https://audience2.example.com"}).
+            // json assertion of header part
+            WithHeader(func(json *assertjson.AssertJSON) {
+                json.Node("/alg").IsString().EqualTo("HS256")
+                json.Node("/typ").IsString().EqualTo("JWT")
+            }).
+            // json assertion of payload part
+            WithPayload(func(json *assertjson.AssertJSON) {
+                json.Node("/name").IsString().EqualTo("John Doe")
+            })
+        // time assertions for standard claims
+        isJWT.WithExpiresAt().AfterDate(2022, time.October, 26)
+        isJWT.WithNotBefore().BeforeDate(2022, time.October, 27)
+        isJWT.WithIssuedAt().BeforeDate(2022, time.October, 27)
 
         // get node values
         assert.Equal(t, "stringValue", json.Node("/stringNode").Value())
