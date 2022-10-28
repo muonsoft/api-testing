@@ -6,17 +6,17 @@ import (
 	"math"
 	"strconv"
 
+	"github.com/muonsoft/api-testing/internal/js"
 	"github.com/stretchr/testify/assert"
 )
 
 // AssertNode - structure for asserting JSON node.
 type AssertNode struct {
-	t          TestingT
-	err        error
-	message    string
-	pathPrefix string
-	path       string
-	value      interface{}
+	t       TestingT
+	err     error
+	message string
+	path    *js.Path
+	value   interface{}
 }
 
 // Value returns JSON node value as an interface. If node does not exist it returns nil.
@@ -45,7 +45,7 @@ func (node *AssertNode) String() string {
 			}
 			return fmt.Sprintf("%f", f)
 		}
-		node.fail(fmt.Sprintf(`JSON node at "%s" cannot be converted into string`, node.Path()))
+		node.fail(fmt.Sprintf(`JSON node at "%s" cannot be converted into string`, node.path.String()))
 	}
 
 	return ""
@@ -59,7 +59,7 @@ func (node *AssertNode) Float() float64 {
 		if f, ok := node.value.(float64); ok {
 			return f
 		}
-		node.fail(fmt.Sprintf(`JSON node at "%s" cannot be converted into float`, node.Path()))
+		node.fail(fmt.Sprintf(`JSON node at "%s" cannot be converted into float`, node.path.String()))
 	}
 
 	return 0
@@ -74,9 +74,9 @@ func (node *AssertNode) Integer() int {
 			if n, f := math.Modf(f); f == 0 {
 				return int(n)
 			}
-			node.fail(fmt.Sprintf(`JSON node at "%s" is not an integer`, node.Path()))
+			node.fail(fmt.Sprintf(`JSON node at "%s" is not an integer`, node.path.String()))
 		} else {
-			node.fail(fmt.Sprintf(`JSON node at "%s" cannot be converted into float`, node.Path()))
+			node.fail(fmt.Sprintf(`JSON node at "%s" cannot be converted into float`, node.path.String()))
 		}
 	}
 
@@ -94,11 +94,6 @@ func (node *AssertNode) JSON() []byte {
 	return nil
 }
 
-// Path returns current node path as string.
-func (node *AssertNode) Path() string {
-	return node.pathPrefix + node.path
-}
-
 // ForEach executes callback function for node assertion on each array or object node.
 func (node *AssertNode) ForEach(assertNode func(node *AssertNode)) {
 	node.t.Helper()
@@ -109,28 +104,26 @@ func (node *AssertNode) ForEach(assertNode func(node *AssertNode)) {
 	if values, ok := node.value.([]interface{}); ok {
 		for i, value := range values {
 			assertNode(&AssertNode{
-				t:          node.t,
-				err:        node.err,
-				message:    node.message,
-				pathPrefix: node.pathPrefix + node.path,
-				path:       "/" + strconv.Itoa(i),
-				value:      value,
+				t:       node.t,
+				err:     node.err,
+				message: node.message,
+				path:    node.path.WithIndex(i),
+				value:   value,
 			})
 		}
 	} else if values, ok := node.value.(map[string]interface{}); ok {
 		for key, value := range values {
 			assertNode(&AssertNode{
-				t:          node.t,
-				err:        node.err,
-				message:    node.message,
-				pathPrefix: node.pathPrefix + node.path,
-				path:       "/" + key,
-				value:      value,
+				t:       node.t,
+				err:     node.err,
+				message: node.message,
+				path:    node.path.WithProperty(key),
+				value:   value,
 			})
 		}
 	} else {
 		node.fail(
-			fmt.Sprintf(`failed asserting that JSON node "%s" is iterable (array or object)`, node.Path()),
+			fmt.Sprintf(`failed asserting that JSON node "%s" is iterable (array or object)`, node.path.String()),
 		)
 	}
 }
@@ -143,7 +136,7 @@ func (node *AssertNode) fail(message string, msgAndArgs ...interface{}) {
 func (node *AssertNode) exists() bool {
 	node.t.Helper()
 	if node.err != nil {
-		node.t.Errorf(`failed to find JSON node "%s": %v`, node.Path(), node.err)
+		node.t.Errorf(`failed to find JSON node "%s": %v`, node.path.String(), node.err)
 	}
 
 	return node.err == nil

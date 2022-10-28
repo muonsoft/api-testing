@@ -24,13 +24,13 @@ func (node *AssertNode) IsArray(msgAndArgs ...interface{}) *ArrayAssertion {
 		if array, ok := node.value.([]interface{}); ok {
 			return &ArrayAssertion{
 				t:       node.t,
-				message: fmt.Sprintf(`%sfailed asserting that JSON node "%s": `, node.message, node.Path()),
-				path:    node.Path(),
+				message: fmt.Sprintf(`%sfailed asserting that JSON node "%s": `, node.message, node.path.String()),
+				path:    node.path.String(),
 				value:   array,
 			}
 		}
 		node.fail(
-			fmt.Sprintf(`failed asserting that JSON node "%s" is array`, node.Path()),
+			fmt.Sprintf(`failed asserting that JSON node "%s" is array`, node.path.String()),
 			msgAndArgs...,
 		)
 	}

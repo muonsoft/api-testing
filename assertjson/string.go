@@ -19,13 +19,13 @@ func (node *AssertNode) IsString(msgAndArgs ...interface{}) *StringAssertion {
 		if s, ok := node.value.(string); ok {
 			return &StringAssertion{
 				t:       node.t,
-				message: fmt.Sprintf(`%sfailed asserting that JSON node "%s": `, node.message, node.Path()),
-				path:    node.Path(),
+				message: fmt.Sprintf(`%sfailed asserting that JSON node "%s": `, node.message, node.path.String()),
+				path:    node.path.String(),
 				value:   s,
 			}
 		}
 		node.fail(
-			fmt.Sprintf(`failed asserting that JSON node "%s" is string`, node.Path()),
+			fmt.Sprintf(`failed asserting that JSON node "%s" is string`, node.path.String()),
 			msgAndArgs...,
 		)
 	}
