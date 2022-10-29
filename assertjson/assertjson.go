@@ -97,7 +97,7 @@ func (j *AssertJSON) At(path ...interface{}) *AssertJSON {
 
 // Atf is used to test assertions on some node in a batch. It returns AssertJSON object on that node.
 // It calculates path by applying fmt.Sprintf function.
-// Deprecated: use Atf() with multiple arguments.
+// Deprecated: use At() with multiple arguments.
 func (j *AssertJSON) Atf(format string, a ...interface{}) *AssertJSON {
 	j.t.Helper()
 	return j.At(fmt.Sprintf(format, a...))
