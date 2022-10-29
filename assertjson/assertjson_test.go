@@ -2577,6 +2577,13 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "deprecated: json pointer path",
+			json: `{"a": {"/b": {"~c": ["value"]}}}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("/a/~1b/~0c/0").IsString().EqualTo("value")
+			},
+		},
+		{
+			name: "deprecated: json pointer path",
 			json: `{"a": {"b": {"c": ["value"]}}}`,
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node("/a/b/c/1").IsString()

@@ -153,7 +153,7 @@ func pathFromJSONPointer(p string) []interface{} {
 		if index, err := strconv.Atoi(elements[i]); err == nil {
 			path = append(path, index)
 		} else {
-			path = append(path, elements[i])
+			path = append(path, decodeReferenceToken(elements[i]))
 		}
 	}
 
@@ -170,4 +170,10 @@ func getValueByPath(data interface{}, path ...interface{}) (interface{}, error) 
 	}
 
 	return v.GetInterface(), nil
+}
+
+func decodeReferenceToken(token string) string {
+	step1 := strings.ReplaceAll(token, `~1`, `/`)
+	step2 := strings.ReplaceAll(step1, `~0`, `~`)
+	return step2
 }
