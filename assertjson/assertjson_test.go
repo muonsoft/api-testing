@@ -113,6 +113,7 @@ func TestFileHas(t *testing.T) {
 		json.Node("time").IsTime().After(time.Date(2021, time.October, 16, 12, 14, 32, 0, time.UTC))
 		json.Node("time").IsTime().Before(time.Date(2023, time.October, 16, 12, 14, 32, 0, time.UTC))
 		json.Node("time").IsTime().BeforeOrEqualTo(time.Date(2022, time.October, 16, 12, 14, 32, 0, time.UTC))
+		json.Node("time").IsTime().AtDate(2022, time.October, 16)
 		json.Node("date").IsDate().EqualToDate(2022, time.October, 16)
 		json.Node("date").IsDate().NotEqualToDate(2021, time.October, 16)
 		json.Node("date").IsDate().AfterDate(2021, time.October, 16)
@@ -171,17 +172,26 @@ func TestFileHas(t *testing.T) {
 			node.IsString().EqualTo("objectValue")
 		})
 
-		// json pointer expression
-		json.Node("complexNode", "items", 1, "key").IsString().EqualTo("value")
-		json.Nodef("/complexNode/items/%d/key", 1).IsString().EqualTo("value")
+		// seek node by path elements
+		json.Node("bookstore", "books", 1, "name").IsString().EqualTo("Green book")
+
+		// use fmt.Stringer in node path
+		id := uuid.FromStringOrNil("9b1100ea-986b-446b-ae7e-0c8ce7196c26")
+		json.Node("hashmap", id, "key").IsString().EqualTo("value")
 
 		// complex keys
 		json.Node("@id").IsString().EqualTo("json-ld-id")
 		json.Node("hydra:members").IsString().EqualTo("hydraMembers")
 
-		// complex assertions
-		json.At("complexNode").Node("items", 1, "key").IsString().EqualTo("value")
-		json.Atf("/complexNode/%s", "items").Node("/1/key").IsString().EqualTo("value")
+		// reusable assertions
+		isGreenBook := func(json *assertjson.AssertJSON) {
+			json.Node("id").IsInteger().EqualTo(123)
+			json.Node("name").IsString().EqualTo("Green book")
+		}
+		json.Node("bookstore", "books", 1).Assert(isGreenBook)
+		json.Node("bookstore", "bestBook").Assert(isGreenBook)
+		isGreenBook(json.At("bookstore", "books", 1))
+		isGreenBook(json.At("bookstore", "bestBook"))
 
 		// get node values
 		assert.Equal(t, "stringValue", json.Node("stringNode").Value())
@@ -295,6 +305,27 @@ func TestHas(t *testing.T) {
 			},
 			wantMessages: []string{
 				`failed asserting that JSON node "key" is iterable (array or object)`,
+			},
+		},
+		{
+			name: "JSON callable assertion",
+			json: `{"key": "value"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").Assert(func(json *assertjson.AssertJSON) {
+					json.Node().IsString().EqualTo("value")
+				})
+			},
+		},
+		{
+			name: "JSON callable assertion fails",
+			json: `{"key": "unexpected"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").Assert(func(json *assertjson.AssertJSON) {
+					json.Node().IsString().EqualTo("value")
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": equal to "value", actual is "unexpected"`,
 			},
 		},
 		{
@@ -1752,6 +1783,37 @@ func TestHas(t *testing.T) {
 			},
 		},
 		{
+			name: "JSON node is time at date start",
+			json: `{"key": "2022-10-16T00:00:00+00:00"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsTime().AtDate(2022, time.October, 16)
+			},
+		},
+		{
+			name: "JSON node is time at date middle",
+			json: `{"key": "2022-10-16T12:00:00+00:00"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsTime().AtDate(2022, time.October, 16)
+			},
+		},
+		{
+			name: "JSON node is time at date end",
+			json: `{"key": "2022-10-16T23:59:59+00:00"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsTime().AtDate(2022, time.October, 16)
+			},
+		},
+		{
+			name: "JSON node is time at date fails",
+			json: `{"key": "2022-10-17T00:00:00+00:00"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsTime().AtDate(2022, time.October, 16)
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": is time at date "2022-10-16", actual is "2022-10-17T00:00:00Z"`,
+			},
+		},
+		{
 			name: "JSON node is date",
 			json: `{"key": "2022-10-16"}`,
 			assert: func(json *assertjson.AssertJSON) {
@@ -2073,6 +2135,20 @@ func TestHas(t *testing.T) {
 			},
 			wantMessages: []string{
 				`failed asserting that JSON node "key": is string with JSON: failed asserting that JSON node "key.key": equal to "expected", actual is "value"`,
+			},
+		},
+		{
+			name: "JSON node is JSON: callable assertion",
+			json: `{"key": "{\"key\": {}}"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().WithJSON(func(json *assertjson.AssertJSON) {
+					json.Node("key").Assert(func(json *assertjson.AssertJSON) {
+						json.Node().IsObject().WithPropertiesCount(1)
+					})
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": is string with JSON: failed asserting that JSON node "key": is object with properties count is 1, actual is 0`,
 			},
 		},
 		{

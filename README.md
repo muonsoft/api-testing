@@ -37,7 +37,7 @@ func TestYourAPI(t *testing.T) {
     response.IsOK()
     response.HasContentType("application/json")
     response.HasJSON(func(json *assertjson.AssertJSON) {
-        json.Node("/ok").IsTrue()
+        json.Node("ok").IsTrue()
     })
     response.Print() // prints response with headers and body
     response.PrintJSON() // prints response with headers and indented JSON body
@@ -149,6 +149,7 @@ func TestYourAPI(t *testing.T) {
         json.Node("time").IsTime().After(time.Date(2021, time.October, 16, 12, 14, 32, 0, time.UTC))
         json.Node("time").IsTime().Before(time.Date(2023, time.October, 16, 12, 14, 32, 0, time.UTC))
         json.Node("time").IsTime().BeforeOrEqualTo(time.Date(2022, time.October, 16, 12, 14, 32, 0, time.UTC))
+        json.Node("time").IsTime().AtDate(2022, time.October, 16)
         json.Node("date").IsDate().EqualToDate(2022, time.October, 16)
         json.Node("date").IsDate().NotEqualToDate(2021, time.October, 16)
         json.Node("date").IsDate().AfterDate(2021, time.October, 16)
@@ -181,15 +182,26 @@ func TestYourAPI(t *testing.T) {
         })
 
         // seek node by path elements
-        json.Node("complexNode", "items", 1, "key").IsString().EqualTo("value")
+        json.Node("bookstore", "books", 1, "name").IsString().EqualTo("Green book")
+
+        // use fmt.Stringer in node path
+        id := uuid.FromStringOrNil("9b1100ea-986b-446b-ae7e-0c8ce7196c26")
+        json.Node("hashmap", id, "key").IsString().EqualTo("value")
 
         // complex keys
         json.Node("@id").IsString().EqualTo("json-ld-id")
         json.Node("hydra:members").IsString().EqualTo("hydraMembers")
 
-        // complex assertions
-        json.At("complexNode").Node("items", 1, "key").IsString().EqualTo("value")
-    
+        // reusable assertions
+        isGreenBook := func(json *assertjson.AssertJSON) {
+            json.Node("id").IsInteger().EqualTo(123)
+            json.Node("name").IsString().EqualTo("Green book")
+        }
+        json.Node("bookstore", "books", 1).Assert(isGreenBook)
+        json.Node("bookstore", "bestBook").Assert(isGreenBook)
+        isGreenBook(json.At("bookstore", "books", 1))
+        isGreenBook(json.At("bookstore", "bestBook"))
+
         // JSON Web Token (JWT) assertion
         isJWT := json.Node("jwt").IsJWT(func(token *jwt.Token) (interface{}, error) {
             return []byte("your-256-bit-secret"), nil

@@ -128,6 +128,19 @@ func (node *AssertNode) ForEach(assertNode func(node *AssertNode)) {
 	}
 }
 
+// Assert executes JSON assertion on the current node value. This is useful when creating
+// reusable assertion using functions.
+func (node *AssertNode) Assert(jsonAssert JSONAssertFunc) {
+	node.t.Helper()
+
+	jsonAssert(&AssertJSON{
+		t:       node.t,
+		message: node.message,
+		path:    node.path,
+		data:    node.value,
+	})
+}
+
 func (node *AssertNode) fail(message string, msgAndArgs ...interface{}) {
 	node.t.Helper()
 	assert.Fail(node.t, node.message+message, msgAndArgs...)
