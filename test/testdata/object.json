@@ -20,12 +20,25 @@
   "objectNode": {
     "objectKey": "objectValue"
   },
-  "complexNode": {
-    "items": [
-      "stringValue",
+  "bookstore": {
+    "books": [
       {
-        "key": "value"
+        "id": 111,
+        "name": "Red book"
+      },
+      {
+        "id": 123,
+        "name": "Green book"
       }
-    ]
+    ],
+    "bestBook": {
+      "id": 123,
+      "name": "Green book"
+    }
+  },
+  "hashmap": {
+    "9b1100ea-986b-446b-ae7e-0c8ce7196c26": {
+      "key": "value"
+    }
   }
 }

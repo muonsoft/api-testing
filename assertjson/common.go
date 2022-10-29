@@ -13,7 +13,7 @@ func (node *AssertNode) Exists(msgAndArgs ...interface{}) bool {
 	node.t.Helper()
 	if node.err != nil {
 		node.fail(
-			fmt.Sprintf(`failed asserting that JSON node "%s" exists`, node.Path()),
+			fmt.Sprintf(`failed asserting that JSON node "%s" exists`, node.path.String()),
 			msgAndArgs...,
 		)
 		return false
@@ -27,7 +27,7 @@ func (node *AssertNode) DoesNotExist(msgAndArgs ...interface{}) {
 	node.t.Helper()
 	if node.err == nil {
 		node.fail(
-			fmt.Sprintf(`failed asserting that JSON node "%s" does not exist`, node.Path()),
+			fmt.Sprintf(`failed asserting that JSON node "%s" does not exist`, node.path.String()),
 			msgAndArgs...,
 		)
 	}
@@ -39,7 +39,7 @@ func (node *AssertNode) IsNull(msgAndArgs ...interface{}) {
 	if node.exists() {
 		if !isNil(node.value) {
 			node.fail(
-				fmt.Sprintf(`failed asserting that JSON node "%s" is null`, node.Path()),
+				fmt.Sprintf(`failed asserting that JSON node "%s" is null`, node.path.String()),
 				msgAndArgs...,
 			)
 		}
@@ -52,7 +52,7 @@ func (node *AssertNode) IsNotNull(msgAndArgs ...interface{}) {
 	if node.exists() {
 		if isNil(node.value) {
 			node.fail(
-				fmt.Sprintf(`failed asserting that JSON node "%s" is not null`, node.Path()),
+				fmt.Sprintf(`failed asserting that JSON node "%s" is not null`, node.path.String()),
 				msgAndArgs...,
 			)
 		}
@@ -66,14 +66,14 @@ func (node *AssertNode) IsTrue(msgAndArgs ...interface{}) {
 		if b, ok := node.value.(bool); ok {
 			if !b {
 				node.fail(
-					fmt.Sprintf(`failed asserting that JSON node "%s" is true`, node.Path()),
+					fmt.Sprintf(`failed asserting that JSON node "%s" is true`, node.path.String()),
 					msgAndArgs...,
 				)
 			}
 			return
 		}
 		node.fail(
-			fmt.Sprintf(`failed asserting that JSON node "%s" is boolean`, node.Path()),
+			fmt.Sprintf(`failed asserting that JSON node "%s" is boolean`, node.path.String()),
 			msgAndArgs...,
 		)
 	}
@@ -86,14 +86,14 @@ func (node *AssertNode) IsFalse(msgAndArgs ...interface{}) {
 		if b, ok := node.value.(bool); ok {
 			if b {
 				node.fail(
-					fmt.Sprintf(`failed asserting that JSON node "%s" is false`, node.Path()),
+					fmt.Sprintf(`failed asserting that JSON node "%s" is false`, node.path.String()),
 					msgAndArgs...,
 				)
 			}
 			return
 		}
 		node.fail(
-			fmt.Sprintf(`failed asserting that JSON node "%s" is boolean`, node.Path()),
+			fmt.Sprintf(`failed asserting that JSON node "%s" is boolean`, node.path.String()),
 			msgAndArgs...,
 		)
 	}
@@ -105,7 +105,7 @@ func (node *AssertNode) EqualJSON(expected string, msgAndArgs ...interface{}) {
 	if node.exists() {
 		data, _ := json.Marshal(node.value)
 		if !assert.JSONEq(node.t, expected, string(data), msgAndArgs...) {
-			node.fail(fmt.Sprintf(`failed at JSON node "%s"`, node.Path()))
+			node.fail(fmt.Sprintf(`failed at JSON node "%s"`, node.path.String()))
 		}
 	}
 }

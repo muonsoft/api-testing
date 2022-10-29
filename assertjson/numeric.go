@@ -15,7 +15,7 @@ func (node *AssertNode) IsInteger(msgAndArgs ...interface{}) *IntegerAssertion {
 		float, ok := node.value.(float64)
 		if !ok {
 			node.fail(
-				fmt.Sprintf(`value at path "%s" is not numeric`, node.Path()),
+				fmt.Sprintf(`value at path "%s" is not numeric`, node.path.String()),
 				msgAndArgs...,
 			)
 			return nil
@@ -23,15 +23,15 @@ func (node *AssertNode) IsInteger(msgAndArgs ...interface{}) *IntegerAssertion {
 		_, fractional := math.Modf(float)
 		if fractional != 0 {
 			node.fail(
-				fmt.Sprintf(`value at path "%s" is float, not integer`, node.Path()),
+				fmt.Sprintf(`value at path "%s" is float, not integer`, node.path.String()),
 				msgAndArgs...,
 			)
 			return nil
 		}
 		return &IntegerAssertion{
 			t:       node.t,
-			message: fmt.Sprintf(`%sfailed asserting that JSON node "%s": `, node.message, node.Path()),
-			path:    node.Path(),
+			message: fmt.Sprintf(`%sfailed asserting that JSON node "%s": `, node.message, node.path.String()),
+			path:    node.path.String(),
 			value:   int(float),
 		}
 	}
@@ -54,13 +54,13 @@ func (node *AssertNode) IsNumber(msgAndArgs ...interface{}) *NumberAssertion {
 		if f, ok := node.value.(float64); ok {
 			return &NumberAssertion{
 				t:       node.t,
-				message: fmt.Sprintf(`%sfailed asserting that JSON node "%s": `, node.message, node.Path()),
-				path:    node.Path(),
+				message: fmt.Sprintf(`%sfailed asserting that JSON node "%s": `, node.message, node.path.String()),
+				path:    node.path.String(),
 				value:   f,
 			}
 		}
 		node.fail(
-			fmt.Sprintf(`value at path "%s" is not a number`, node.Path()),
+			fmt.Sprintf(`value at path "%s" is not a number`, node.path.String()),
 			msgAndArgs...,
 		)
 	}

@@ -225,6 +225,30 @@ func (a *TimeAssertion) BeforeOrEqualToDate(year int, month time.Month, day int,
 	return a.BeforeOrEqualTo(newDate(year, month, day), msgAndArgs...)
 }
 
+// AtDate asserts that the JSON node is time between the beginning and the end of the given date.
+func (a *TimeAssertion) AtDate(year int, month time.Month, day int, msgAndArgs ...interface{}) *TimeAssertion {
+	if a == nil {
+		return nil
+	}
+	a.t.Helper()
+
+	begin := newDate(year, month, day)
+	end := begin.Add(24 * time.Hour)
+
+	if !((a.value.After(begin) || a.value.Equal(begin)) && a.value.Before(end)) {
+		a.fail(
+			fmt.Sprintf(
+				`is time at date "%s", actual is "%s"`,
+				begin.Format(dateLayout),
+				a.value.Format(a.layout),
+			),
+			msgAndArgs...,
+		)
+	}
+
+	return a
+}
+
 // Value returns JSON node value as time.Time. If string is not a valid time it returns empty time.
 func (a *TimeAssertion) Value() time.Time {
 	if a == nil {

@@ -24,13 +24,13 @@ func (node *AssertNode) IsObject(msgAndArgs ...interface{}) *ObjectAssertion {
 		if object, ok := node.value.(map[string]interface{}); ok {
 			return &ObjectAssertion{
 				t:       node.t,
-				message: fmt.Sprintf(`%sfailed asserting that JSON node "%s": `, node.message, node.Path()),
-				path:    node.Path(),
+				message: fmt.Sprintf(`%sfailed asserting that JSON node "%s": `, node.message, node.path.String()),
+				path:    node.path.String(),
 				value:   object,
 			}
 		}
 		node.fail(
-			fmt.Sprintf(`failed asserting that JSON node "%s" is object`, node.Path()),
+			fmt.Sprintf(`failed asserting that JSON node "%s" is object`, node.path.String()),
 			msgAndArgs...,
 		)
 	}

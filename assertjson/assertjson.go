@@ -6,9 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"strconv"
+	"strings"
 
+	jsoniter "github.com/json-iterator/go"
+	"github.com/muonsoft/api-testing/internal/js"
 	"github.com/stretchr/testify/assert"
-	"github.com/xeipuuv/gojsonpointer"
 )
 
 // TestingT is an interface wrapper around *testing.T.
@@ -21,7 +24,7 @@ type TestingT interface {
 type AssertJSON struct {
 	t       TestingT
 	message string
-	path    string
+	path    *js.Path
 	data    interface{}
 }
 
@@ -47,54 +50,54 @@ func Has(t TestingT, data []byte, jsonAssert JSONAssertFunc) {
 }
 
 // Node searches for JSON node by JSON Path Syntax. Returns struct for asserting the node values.
-func (j *AssertJSON) Node(path string) *AssertNode {
+func (j *AssertJSON) Node(path ...interface{}) *AssertNode {
 	j.t.Helper()
-	var value interface{}
 
-	pointer, err := gojsonpointer.NewJsonPointer(path)
-	if err == nil {
-		value, _, err = pointer.Get(j.data)
+	node := &AssertNode{t: j.t, message: j.message}
+
+	path = preprocessPath(path)
+	jspath, err := js.PathFromAny(path...)
+	if err != nil {
+		node.fail(fmt.Sprintf("parse path: %s", err.Error()))
+	} else {
+		node.path = j.path.With(jspath)
+		node.value, node.err = getValueByPath(j.data, path...)
 	}
 
-	return &AssertNode{
-		t:          j.t,
-		err:        err,
-		message:    j.message,
-		pathPrefix: j.path,
-		path:       path,
-		value:      value,
-	}
+	return node
 }
 
 // Nodef searches for JSON node by JSON Path Syntax. Returns struct for asserting the node values.
 // It calculates path by applying fmt.Sprintf function.
+// Deprecated: use Node() with multiple arguments.
 func (j *AssertJSON) Nodef(format string, a ...interface{}) *AssertNode {
 	j.t.Helper()
 	return j.Node(fmt.Sprintf(format, a...))
 }
 
 // At is used to test assertions on some node in a batch. It returns AssertJSON object on that node.
-func (j *AssertJSON) At(path string) *AssertJSON {
+func (j *AssertJSON) At(path ...interface{}) *AssertJSON {
 	j.t.Helper()
-	var value interface{}
+	var err error
+	a := &AssertJSON{t: j.t}
 
-	pointer, err := gojsonpointer.NewJsonPointer(path)
-	if err == nil {
-		value, _, err = pointer.Get(j.data)
-	}
+	path = preprocessPath(path)
+	a.path, err = js.PathFromAny(path...)
 	if err != nil {
-		j.fail(fmt.Sprintf(`failed to find JSON node "%s": %v`, path, err))
+		a.fail(fmt.Sprintf("parse path: %s", err.Error()))
 	}
 
-	return &AssertJSON{
-		t:    j.t,
-		path: j.path + path,
-		data: value,
+	a.data, err = getValueByPath(j.data, path...)
+	if err != nil {
+		j.fail(fmt.Sprintf(`failed to find JSON node "%s": %v`, a.path.String(), err))
 	}
+
+	return a
 }
 
 // Atf is used to test assertions on some node in a batch. It returns AssertJSON object on that node.
 // It calculates path by applying fmt.Sprintf function.
+// Deprecated: use At() with multiple arguments.
 func (j *AssertJSON) Atf(format string, a ...interface{}) *AssertJSON {
 	j.t.Helper()
 	return j.At(fmt.Sprintf(format, a...))
@@ -113,4 +116,64 @@ func (j *AssertJSON) assert(data []byte, jsonAssert JSONAssertFunc) {
 func (j *AssertJSON) fail(message string, msgAndArgs ...interface{}) {
 	j.t.Helper()
 	assert.Fail(j.t, j.message+message, msgAndArgs...)
+}
+
+func preprocessPath(path []interface{}) []interface{} {
+	// deprecated behaviour: should be removed
+	if jsonpath, ok := isJSONPointer(path); ok {
+		path = pathFromJSONPointer(jsonpath)
+	}
+
+	for i := range path {
+		if s, ok := path[i].(fmt.Stringer); ok {
+			path[i] = s.String()
+		}
+	}
+
+	return path
+}
+
+func isJSONPointer(path []interface{}) (string, bool) {
+	if len(path) != 1 {
+		return "", false
+	}
+	if jsonpath, ok := path[0].(string); ok && strings.HasPrefix(jsonpath, "/") || jsonpath == "" {
+		return jsonpath, true
+	}
+
+	return "", false
+}
+
+// Deprecated: should be removed in future versions.
+func pathFromJSONPointer(p string) []interface{} {
+	elements := strings.Split(p, "/")
+	path := make([]interface{}, 0, len(elements)-1)
+
+	for i := 1; i < len(elements); i++ {
+		if index, err := strconv.Atoi(elements[i]); err == nil {
+			path = append(path, index)
+		} else {
+			path = append(path, decodeReferenceToken(elements[i]))
+		}
+	}
+
+	return path
+}
+
+func getValueByPath(data interface{}, path ...interface{}) (interface{}, error) {
+	v := jsoniter.Wrap(data)
+	for _, e := range path {
+		v = v.Get(e)
+		if v.LastError() != nil {
+			return nil, v.LastError()
+		}
+	}
+
+	return v.GetInterface(), nil
+}
+
+func decodeReferenceToken(token string) string {
+	step1 := strings.ReplaceAll(token, `~1`, `/`)
+	step2 := strings.ReplaceAll(step1, `~0`, `~`)
+	return step2
 }
