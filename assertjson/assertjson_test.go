@@ -2553,6 +2553,44 @@ func TestHas(t *testing.T) {
 				`failed asserting that JSON node "a.b.c[1]" is string`,
 			},
 		},
+		{
+			name: "seek by json iterator",
+			json: `["value"]`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node(0).IsString().EqualTo("expected")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "[0]": equal to "expected", actual is "value"`,
+			},
+		},
+		{
+			name: "seek by json iterator",
+			json: `{"a": {"b": {"c": ["value"]}}}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.At("a").At("b").At("c").At(0).Node().IsString().EqualTo("expected")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "a.b.c[0]": equal to "expected", actual is "value"`,
+			},
+		},
+		{
+			name: "seek by json iterator",
+			json: `{"a": {"b": {"c": ["value"]}}}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("a").Assert(func(json *assertjson.AssertJSON) {
+					json.Node("b").Assert(func(json *assertjson.AssertJSON) {
+						json.Node("c").Assert(func(json *assertjson.AssertJSON) {
+							json.Node(0).Assert(func(json *assertjson.AssertJSON) {
+								json.Node().IsString().EqualTo("expected")
+							})
+						})
+					})
+				})
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "a.b.c[0]": equal to "expected", actual is "value"`,
+			},
+		},
 		// deprecated behaviour: seek by json pointer path
 		{
 			name: "deprecated: json pointer path",

@@ -78,14 +78,14 @@ func (j *AssertJSON) Nodef(format string, a ...interface{}) *AssertNode {
 // At is used to test assertions on some node in a batch. It returns AssertJSON object on that node.
 func (j *AssertJSON) At(path ...interface{}) *AssertJSON {
 	j.t.Helper()
-	var err error
 	a := &AssertJSON{t: j.t}
 
 	path = preprocessPath(path)
-	a.path, err = js.PathFromAny(path...)
+	jsPath, err := js.PathFromAny(path...)
 	if err != nil {
 		a.fail(fmt.Sprintf("parse path: %s", err.Error()))
 	}
+	a.path = j.path.With(jsPath)
 
 	a.data, err = getValueByPath(j.data, path...)
 	if err != nil {
@@ -137,7 +137,7 @@ func isJSONPointer(path []interface{}) (string, bool) {
 	if len(path) != 1 {
 		return "", false
 	}
-	if jsonpath, ok := path[0].(string); ok && strings.HasPrefix(jsonpath, "/") || jsonpath == "" {
+	if jsonpath, ok := path[0].(string); ok && (strings.HasPrefix(jsonpath, "/") || jsonpath == "") {
 		return jsonpath, true
 	}
 
