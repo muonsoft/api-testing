@@ -18,6 +18,7 @@ import (
 type TestingT interface {
 	Helper()
 	Errorf(format string, args ...interface{})
+	Log(args ...interface{})
 }
 
 // AssertJSON - main structure that holds parsed JSON.
@@ -163,6 +164,12 @@ func pathFromJSONPointer(p string) []interface{} {
 func getValueByPath(data interface{}, path ...interface{}) (interface{}, error) {
 	v := jsoniter.Wrap(data)
 	for _, e := range path {
+		if _, ok := e.(int); ok {
+			if _, ok := v.GetInterface().(map[string]interface{}); ok {
+				return nil, fmt.Errorf("value of type int is not assignable to type string")
+			}
+		}
+
 		v = v.Get(e)
 		if v.LastError() != nil {
 			return nil, v.LastError()

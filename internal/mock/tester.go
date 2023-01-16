@@ -24,6 +24,10 @@ func (tester *Tester) Fatal(args ...interface{}) {
 	tester.messages = append(tester.messages, fmt.Sprint(args...))
 }
 
+func (tester *Tester) Log(args ...interface{}) {
+	tester.messages = append(tester.messages, fmt.Sprint(args...))
+}
+
 func (tester *Tester) AssertContains(t *testing.T, messages []string) {
 	t.Helper()
 	if len(tester.messages) != len(messages) {

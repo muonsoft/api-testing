@@ -141,6 +141,12 @@ func (node *AssertNode) Assert(jsonAssert JSONAssertFunc) {
 	})
 }
 
+func (node *AssertNode) Print() {
+	node.t.Helper()
+	printableJSON, _ := json.MarshalIndent(node.value, "", "\t")
+	node.t.Log(fmt.Sprintf("JSON node at \"%s\":\n", node.path.String()), string(printableJSON))
+}
+
 func (node *AssertNode) fail(message string, msgAndArgs ...interface{}) {
 	node.t.Helper()
 	assert.Fail(node.t, node.message+message, msgAndArgs...)

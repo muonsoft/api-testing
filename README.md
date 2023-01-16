@@ -243,6 +243,9 @@ func TestYourAPI(t *testing.T) {
         assert.Equal(t, "2022-10-16T15:14:32+03:00", json.Node("time").Time().Format(time.RFC3339))
         assert.Equal(t, "23e98a0c-26c8-410f-978f-d1d67228af87", json.Node("uuid").IsUUID().Value().String())
         assert.Equal(t, "23e98a0c-26c8-410f-978f-d1d67228af87", json.Node("uuid").UUID().String())
+
+        // debug helpers
+        json.Node("bookstore", "books", 1).Print()
     })
 }
 ```

@@ -226,6 +226,9 @@ func TestFileHas(t *testing.T) {
 				}).
 				Raw,
 		)
+
+		// debug helpers
+		json.Node("bookstore", "books", 1).Print()
 	})
 }
 
@@ -2589,6 +2592,37 @@ func TestHas(t *testing.T) {
 			},
 			wantMessages: []string{
 				`failed asserting that JSON node "a.b.c[0]": equal to "expected", actual is "value"`,
+			},
+		},
+		{
+			name: "seek by json iterator",
+			json: `{"a": {"b": {"c": ["value"]}}}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("a", 0).IsString()
+			},
+			wantMessages: []string{
+				`failed to find JSON node "a[0]": value of type int is not assignable to type string`,
+			},
+		},
+		{
+			name: "seek by json iterator",
+			json: `{"a": [{"b": 1}]}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("a", "b").IsString()
+			},
+			wantMessages: []string{
+				`failed to find JSON node "a.b": [b] not found`,
+			},
+		},
+		// debug helpers
+		{
+			name: "print json node",
+			json: `{"a": {"b": {"c": ["value"]}}}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("a", "b").Print()
+			},
+			wantMessages: []string{
+				`JSON node at "a.b"`,
 			},
 		},
 		// deprecated behaviour: seek by json pointer path
