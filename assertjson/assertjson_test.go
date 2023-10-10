@@ -42,6 +42,8 @@ func TestFileHas(t *testing.T) {
 
 		// fluent string assertions
 		json.Node("stringNode").IsString()
+		json.Node("emptyString").IsString().IsEmpty()
+		json.Node("stringNode").IsString().IsNotEmpty()
 		json.Node("stringNode").IsString().EqualTo("stringValue")
 		json.Node("stringNode").IsString().EqualToOneOf("stringValue", "nextValue")
 		json.Node("stringNode").IsString().NotEqualTo("invalid")
@@ -789,6 +791,40 @@ func TestHas(t *testing.T) {
 			},
 		},
 		{
+			name: "JSON node is string is empty",
+			json: `{"key": ""}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().IsEmpty()
+			},
+		},
+		{
+			name: "JSON node is string is empty fails",
+			json: `{"key": "value"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().IsEmpty()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": is empty string, actual is "value"`,
+			},
+		},
+		{
+			name: "JSON node is string is not empty",
+			json: `{"key": "value"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().IsNotEmpty()
+			},
+		},
+		{
+			name: "JSON node is string is not empty fails",
+			json: `{"key": ""}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().IsNotEmpty()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": is not empty string`,
+			},
+		},
+		{
 			name: "JSON node is string equal to",
 			json: `{"key": "value"}`,
 			assert: func(json *assertjson.AssertJSON) {
@@ -1053,6 +1089,8 @@ func TestHas(t *testing.T) {
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node("key").
 					IsString().
+					IsEmpty().
+					IsNotEmpty().
 					EqualTo("").
 					NotEqualTo("").
 					EqualToOneOf("").
