@@ -93,6 +93,35 @@ type StringAssertion struct {
 	value   string
 }
 
+// IsEmpty asserts that the JSON node has a string value equals to empty string.
+func (a *StringAssertion) IsEmpty(msgAndArgs ...interface{}) *StringAssertion {
+	if a == nil {
+		return nil
+	}
+	a.t.Helper()
+	if a.value != "" {
+		a.fail(
+			fmt.Sprintf(`is empty string, actual is "%s"`, a.value),
+			msgAndArgs...,
+		)
+	}
+
+	return a
+}
+
+// IsNotEmpty asserts that the JSON node has a string value not equals to empty string.
+func (a *StringAssertion) IsNotEmpty(msgAndArgs ...interface{}) *StringAssertion {
+	if a == nil {
+		return nil
+	}
+	a.t.Helper()
+	if a.value == "" {
+		a.fail(`is not empty string`, msgAndArgs...)
+	}
+
+	return a
+}
+
 // EqualTo asserts that the JSON node has a string value equals to the given value.
 func (a *StringAssertion) EqualTo(expectedValue string, msgAndArgs ...interface{}) *StringAssertion {
 	if a == nil {

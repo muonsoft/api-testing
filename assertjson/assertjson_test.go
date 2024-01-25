@@ -42,6 +42,8 @@ func TestFileHas(t *testing.T) {
 
 		// fluent string assertions
 		json.Node("stringNode").IsString()
+		json.Node("emptyString").IsString().IsEmpty()
+		json.Node("stringNode").IsString().IsNotEmpty()
 		json.Node("stringNode").IsString().EqualTo("stringValue")
 		json.Node("stringNode").IsString().EqualToOneOf("stringValue", "nextValue")
 		json.Node("stringNode").IsString().NotEqualTo("invalid")
@@ -67,6 +69,8 @@ func TestFileHas(t *testing.T) {
 
 		// numeric assertions
 		json.Node("integerNode").IsInteger()
+		json.Node("zeroInteger").IsInteger().IsZero()
+		json.Node("integerNode").IsInteger().IsNotZero()
 		json.Node("integerNode").IsInteger().EqualTo(123)
 		json.Node("integerNode").IsInteger().NotEqualTo(321)
 		json.Node("integerNode").IsInteger().GreaterThan(122)
@@ -81,6 +85,8 @@ func TestFileHas(t *testing.T) {
 		json.Node("integerNode").IsNumberLessThanOrEqual(123)
 		json.Node("floatNode").IsFloat()
 		json.Node("floatNode").IsNumber()
+		json.Node("zeroFloat").IsNumber().IsZero()
+		json.Node("floatNode").IsNumber().IsNotZero()
 		json.Node("floatNode").IsNumber().EqualTo(123.123)
 		json.Node("floatNode").IsNumber().NotEqualTo(321.123)
 		json.Node("floatNode").IsNumber().EqualToWithDelta(123.123, 0.1)
@@ -226,6 +232,14 @@ func TestFileHas(t *testing.T) {
 				}).
 				Raw,
 		)
+
+		// standalone JWT assertion
+		assertjson.IsJWT(t,
+			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiaHR0cHM6Ly9hdWRpZW5jZTEuZXhhbXBsZS5jb20iLCJodHRwczovL2F1ZGllbmNlMi5leGFtcGxlLmNvbSJdLCJleHAiOjQ4MjAzNjAxMzEsImlhdCI6MTY2Njc1NjUzMSwiaXNzIjoiaHR0cHM6Ly9pc3N1ZXIuZXhhbXBsZS5jb20iLCJqdGkiOiJhYmMxMjM0NSIsIm5hbWUiOiJKb2huIERvZSIsIm5iZiI6MTY2Njc1NjUzMSwic3ViIjoiaHR0cHM6Ly9zdWJqZWN0LmV4YW1wbGUuY29tIn0.fGUvIn-BV8bPKkZdrxUneew3_qBe-knptL9a_TkNA4M",
+			func(token *jwt.Token) (interface{}, error) { return []byte("your-256-bit-secret"), nil },
+		).WithPayload(func(json *assertjson.AssertJSON) {
+			json.Node("name").IsString().EqualTo("John Doe")
+		})
 
 		// debug helpers
 		json.Node("bookstore", "books", 1).Print()
@@ -489,6 +503,40 @@ func TestHas(t *testing.T) {
 			},
 		},
 		{
+			name: "JSON node is number is zero",
+			json: `{"key": 0}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsNumber().IsZero()
+			},
+		},
+		{
+			name: "JSON node is number is zero fails",
+			json: `{"key": 1.2}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsNumber().IsZero()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": is zero, actual is 1.200000`,
+			},
+		},
+		{
+			name: "JSON node is number is not zero",
+			json: `{"key": 1.2}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsNumber().IsNotZero()
+			},
+		},
+		{
+			name: "JSON node is number is not zero fails",
+			json: `{"key": 0}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsNumber().IsNotZero()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": is not zero`,
+			},
+		},
+		{
 			name: "JSON node is number equal to",
 			json: `{"key": 123.123}`,
 			assert: func(json *assertjson.AssertJSON) {
@@ -653,6 +701,40 @@ func TestHas(t *testing.T) {
 			},
 		},
 		{
+			name: "JSON node is integer is zero",
+			json: `{"key": 0}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsInteger().IsZero()
+			},
+		},
+		{
+			name: "JSON node is integer is zero fails",
+			json: `{"key": 1}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsInteger().IsZero()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": is zero, actual is 1`,
+			},
+		},
+		{
+			name: "JSON node is integer is not zero",
+			json: `{"key": 1}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsInteger().IsNotZero()
+			},
+		},
+		{
+			name: "JSON node is integer is not zero fails",
+			json: `{"key": 0}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsInteger().IsNotZero()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": is not zero`,
+			},
+		},
+		{
 			name: "JSON node is integer equal to",
 			json: `{"key": 123}`,
 			assert: func(json *assertjson.AssertJSON) {
@@ -786,6 +868,40 @@ func TestHas(t *testing.T) {
 			},
 			wantMessages: []string{
 				`failed asserting that JSON node "key" is string`,
+			},
+		},
+		{
+			name: "JSON node is string is empty",
+			json: `{"key": ""}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().IsEmpty()
+			},
+		},
+		{
+			name: "JSON node is string is empty fails",
+			json: `{"key": "value"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().IsEmpty()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": is empty string, actual is "value"`,
+			},
+		},
+		{
+			name: "JSON node is string is not empty",
+			json: `{"key": "value"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().IsNotEmpty()
+			},
+		},
+		{
+			name: "JSON node is string is not empty fails",
+			json: `{"key": ""}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().IsNotEmpty()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": is not empty string`,
 			},
 		},
 		{
@@ -1053,6 +1169,8 @@ func TestHas(t *testing.T) {
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node("key").
 					IsString().
+					IsEmpty().
+					IsNotEmpty().
 					EqualTo("").
 					NotEqualTo("").
 					EqualToOneOf("").
@@ -2700,7 +2818,7 @@ func TestAssertNode_Exists(t *testing.T) {
 
 const tokenSecret = "your-256-bit-secret"
 
-func getJWTSecret(token *jwt.Token) (interface{}, error) {
+func getJWTSecret(_ *jwt.Token) (interface{}, error) {
 	return []byte(tokenSecret), nil
 }
 

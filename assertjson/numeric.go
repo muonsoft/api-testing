@@ -126,6 +126,37 @@ type NumberAssertion struct {
 	value   float64
 }
 
+// IsZero asserts that the JSON node has a numeric value equals to zero.
+func (a *NumberAssertion) IsZero(msgAndArgs ...interface{}) *NumberAssertion {
+	if a == nil {
+		return nil
+	}
+	a.t.Helper()
+
+	if a.value != 0 {
+		a.fail(
+			fmt.Sprintf(`is zero, actual is %f`, a.value),
+			msgAndArgs...,
+		)
+	}
+
+	return nil
+}
+
+// IsNotZero asserts that the JSON node has a numeric value not equals to zero.
+func (a *NumberAssertion) IsNotZero(msgAndArgs ...interface{}) *NumberAssertion {
+	if a == nil {
+		return nil
+	}
+	a.t.Helper()
+
+	if a.value == 0 {
+		a.fail(`is not zero`, msgAndArgs...)
+	}
+
+	return nil
+}
+
 // EqualTo asserts that the JSON node has a numeric value equals to the given value.
 func (a *NumberAssertion) EqualTo(expected float64, msgAndArgs ...interface{}) *NumberAssertion {
 	if a == nil {
@@ -257,6 +288,37 @@ type IntegerAssertion struct {
 	message string
 	path    string
 	value   int
+}
+
+// IsZero asserts that the JSON node has an integer value equals to 0.
+func (a *IntegerAssertion) IsZero(msgAndArgs ...interface{}) *IntegerAssertion {
+	if a == nil {
+		return nil
+	}
+	a.t.Helper()
+
+	if a.value != 0 {
+		a.fail(
+			fmt.Sprintf(`is zero, actual is %d`, a.value),
+			msgAndArgs...,
+		)
+	}
+
+	return nil
+}
+
+// IsNotZero asserts that the JSON node has an integer value not equals to 0.
+func (a *IntegerAssertion) IsNotZero(msgAndArgs ...interface{}) *IntegerAssertion {
+	if a == nil {
+		return nil
+	}
+	a.t.Helper()
+
+	if a.value == 0 {
+		a.fail(`is not zero`, msgAndArgs...)
+	}
+
+	return nil
 }
 
 // EqualTo asserts that the JSON node has an integer value equals to the given value.

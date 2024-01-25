@@ -11,6 +11,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// IsJWT asserts that the string contains valid JWT.
+func IsJWT(t TestingT, value string, keyFunc jwt.Keyfunc) *JWTAssertion {
+	t.Helper()
+	token, err := jwt.Parse(value, keyFunc)
+	if err == nil {
+		return &JWTAssertion{t: t, token: token}
+	}
+
+	assert.Fail(t, fmt.Sprintf(`failed asserting that string contains JWT: %s`, err.Error()))
+
+	return nil
+}
+
 // JWTAssertion is used to build a chain of assertions for the JWT node.
 type JWTAssertion struct {
 	t       TestingT
