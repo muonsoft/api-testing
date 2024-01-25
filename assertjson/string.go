@@ -116,10 +116,7 @@ func (a *StringAssertion) IsNotEmpty(msgAndArgs ...interface{}) *StringAssertion
 	}
 	a.t.Helper()
 	if a.value == "" {
-		a.fail(
-			`is not empty string`,
-			msgAndArgs...,
-		)
+		a.fail(`is not empty string`, msgAndArgs...)
 	}
 
 	return a

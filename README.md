@@ -91,6 +91,8 @@ func TestYourAPI(t *testing.T) {
 
         // fluent string assertions
         json.Node("stringNode").IsString()
+        json.Node("emptyString").IsString().IsEmpty()
+        json.Node("stringNode").IsString().IsNotEmpty()
         json.Node("stringNode").IsString().EqualTo("stringValue")
         json.Node("stringNode").IsString().EqualToOneOf("stringValue", "nextValue")
         json.Node("stringNode").IsString().NotEqualTo("invalid")
@@ -115,6 +117,8 @@ func TestYourAPI(t *testing.T) {
 
         // numeric assertions
         json.Node("integerNode").IsInteger()
+        json.Node("zeroInteger").IsInteger().IsZero()
+        json.Node("integerNode").IsInteger().IsNotZero()
         json.Node("integerNode").IsInteger().EqualTo(123)
         json.Node("integerNode").IsInteger().NotEqualTo(321)
         json.Node("integerNode").IsInteger().GreaterThan(122)
@@ -123,6 +127,8 @@ func TestYourAPI(t *testing.T) {
         json.Node("integerNode").IsInteger().LessThanOrEqual(123)
         json.Node("floatNode").IsFloat()
         json.Node("floatNode").IsNumber()
+        json.Node("zeroFloat").IsNumber().IsZero()
+        json.Node("floatNode").IsNumber().IsNotZero()
         json.Node("floatNode").IsNumber().EqualTo(123.123)
         json.Node("floatNode").IsNumber().NotEqualTo(321.123)
         json.Node("floatNode").IsNumber().EqualToWithDelta(123.123, 0.1)
@@ -243,6 +249,14 @@ func TestYourAPI(t *testing.T) {
         assert.Equal(t, "2022-10-16T15:14:32+03:00", json.Node("time").Time().Format(time.RFC3339))
         assert.Equal(t, "23e98a0c-26c8-410f-978f-d1d67228af87", json.Node("uuid").IsUUID().Value().String())
         assert.Equal(t, "23e98a0c-26c8-410f-978f-d1d67228af87", json.Node("uuid").UUID().String())
+
+        // standalone JWT assertion
+        assertjson.IsJWT(t,
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiaHR0cHM6Ly9hdWRpZW5jZTEuZXhhbXBsZS5jb20iLCJodHRwczovL2F1ZGllbmNlMi5leGFtcGxlLmNvbSJdLCJleHAiOjQ4MjAzNjAxMzEsImlhdCI6MTY2Njc1NjUzMSwiaXNzIjoiaHR0cHM6Ly9pc3N1ZXIuZXhhbXBsZS5jb20iLCJqdGkiOiJhYmMxMjM0NSIsIm5hbWUiOiJKb2huIERvZSIsIm5iZiI6MTY2Njc1NjUzMSwic3ViIjoiaHR0cHM6Ly9zdWJqZWN0LmV4YW1wbGUuY29tIn0.fGUvIn-BV8bPKkZdrxUneew3_qBe-knptL9a_TkNA4M",
+            func(token *jwt.Token) (interface{}, error) { return []byte("your-256-bit-secret"), nil },
+        ).WithPayload(func(json *assertjson.AssertJSON) {
+            json.Node("name").IsString().EqualTo("John Doe")
+        })
 
         // debug helpers
         json.Node("bookstore", "books", 1).Print()
