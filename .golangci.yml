@@ -72,3 +72,21 @@ issues:
         - scopelint
         - gochecknoglobals
         - goerr113
+
+linters-settings:
+  depguard:
+    rules:
+      main:
+        files:
+          - $all
+          - "!$test"
+          - "!**/test/**/*"
+        allow:
+          - $gostd
+          - github.com
+      test:
+        files:
+          - "$test"
+        allow:
+          - $gostd
+          - github.com

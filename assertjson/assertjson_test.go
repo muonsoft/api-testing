@@ -2818,7 +2818,7 @@ func TestAssertNode_Exists(t *testing.T) {
 
 const tokenSecret = "your-256-bit-secret"
 
-func getJWTSecret(token *jwt.Token) (interface{}, error) {
+func getJWTSecret(_ *jwt.Token) (interface{}, error) {
 	return []byte(tokenSecret), nil
 }
 
