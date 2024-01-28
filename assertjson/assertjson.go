@@ -29,6 +29,10 @@ type AssertJSON struct {
 	data    interface{}
 }
 
+func NewAssertJSON(t TestingT, message string, data interface{}) *AssertJSON {
+	return &AssertJSON{t: t, message: message, data: data}
+}
+
 // JSONAssertFunc - callback function used for asserting JSON nodes.
 type JSONAssertFunc func(json *AssertJSON)
 

@@ -4,63 +4,84 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"testing"
 )
 
 // RequestOption can be used to tune up http.Request.
 type RequestOption func(r *http.Request)
 
-// WithHeader options adds specific header to the request.
+// WithHeader option adds specific header to the request.
 func WithHeader(key, value string) RequestOption {
 	return func(r *http.Request) {
-		r.Header.Set(key, value)
+		r.Header.Add(key, value)
+	}
+}
+
+// WithContentType option adds Content-Type header to the request.
+func WithContentType(contentType string) RequestOption {
+	return func(r *http.Request) {
+		r.Header.Add("Content-Type", contentType)
+	}
+}
+
+// WithJSONContentType option adds Content-Type header to the request
+// with "application/json" content type.
+func WithJSONContentType() RequestOption {
+	return func(r *http.Request) {
+		r.Header.Add("Content-Type", "application/json; charset=utf-8")
+	}
+}
+
+// WithCookie option adds a cookie to the request.
+func WithCookie(cookie *http.Cookie) RequestOption {
+	return func(r *http.Request) {
+		r.AddCookie(cookie)
 	}
 }
 
 // HandleRequest is used to test http.Handler by passing httptest.ResponseRecorder to it.
-// This function returns AssertResponse struct as a helper to build assertions on the response.
-func HandleRequest(tb testing.TB, handler http.Handler, request *http.Request) *AssertResponse {
-	tb.Helper()
+// This function returns ResponseAssertion struct as a helper to build assertions on the response.
+func HandleRequest(t TestingT, handler http.Handler, request *http.Request) *ResponseAssertion {
+	t.Helper()
 	recorder := httptest.NewRecorder()
 	handler.ServeHTTP(recorder, request)
-	return &AssertResponse{t: tb, recorder: recorder}
+	return &ResponseAssertion{t: t, recorder: recorder}
 }
 
 // HandleGET is an alias for HandleRequest that builds the GET request from url and options.
-func HandleGET(tb testing.TB, handler http.Handler, url string, options ...RequestOption) *AssertResponse {
-	tb.Helper()
-	return handleRequest(tb, handler, http.MethodGet, url, nil, options...)
+func HandleGET(t TestingT, handler http.Handler, url string, options ...RequestOption) *ResponseAssertion {
+	t.Helper()
+	return handleRequest(t, handler, http.MethodGet, url, nil, options...)
 }
 
 // HandlePOST is an alias for HandleRequest that builds the POST request from url, body and options.
-func HandlePOST(tb testing.TB, handler http.Handler, url string, body io.Reader, options ...RequestOption) *AssertResponse {
-	tb.Helper()
-	return handleRequest(tb, handler, http.MethodPost, url, body, options...)
+func HandlePOST(t TestingT, handler http.Handler, url string, body io.Reader, options ...RequestOption) *ResponseAssertion {
+	t.Helper()
+	return handleRequest(t, handler, http.MethodPost, url, body, options...)
 }
 
 // HandlePUT is an alias for HandleRequest that builds the PUT request from url, body and options.
-func HandlePUT(tb testing.TB, handler http.Handler, url string, body io.Reader, options ...RequestOption) *AssertResponse {
-	tb.Helper()
-	return handleRequest(tb, handler, http.MethodPut, url, body, options...)
+func HandlePUT(t TestingT, handler http.Handler, url string, body io.Reader, options ...RequestOption) *ResponseAssertion {
+	t.Helper()
+	return handleRequest(t, handler, http.MethodPut, url, body, options...)
 }
 
 // HandlePATCH is an alias for HandleRequest that builds the PATCH request from url, body and options.
-func HandlePATCH(tb testing.TB, handler http.Handler, url string, body io.Reader, options ...RequestOption) *AssertResponse {
-	tb.Helper()
-	return handleRequest(tb, handler, http.MethodPatch, url, body, options...)
+func HandlePATCH(t TestingT, handler http.Handler, url string, body io.Reader, options ...RequestOption) *ResponseAssertion {
+	t.Helper()
+	return handleRequest(t, handler, http.MethodPatch, url, body, options...)
 }
 
 // HandleDELETE is an alias for HandleRequest that builds the DELETE request from url and options.
-func HandleDELETE(tb testing.TB, handler http.Handler, url string, options ...RequestOption) *AssertResponse {
-	tb.Helper()
-	return handleRequest(tb, handler, http.MethodDelete, url, nil, options...)
+func HandleDELETE(t TestingT, handler http.Handler, url string, options ...RequestOption) *ResponseAssertion {
+	t.Helper()
+	return handleRequest(t, handler, http.MethodDelete, url, nil, options...)
 }
 
-func handleRequest(tb testing.TB, handler http.Handler, method, url string, body io.Reader, options ...RequestOption) *AssertResponse {
-	tb.Helper()
+func handleRequest(t TestingT, handler http.Handler, method, url string, body io.Reader, options ...RequestOption) *ResponseAssertion {
+	t.Helper()
 	request := httptest.NewRequest(method, url, body)
 	for _, setUpRequest := range options {
 		setUpRequest(request)
 	}
-	return HandleRequest(tb, handler, request)
+	return HandleRequest(t, handler, request)
 }

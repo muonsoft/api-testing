@@ -31,7 +31,6 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/xmlpath.v2"
@@ -39,13 +38,13 @@ import (
 
 // AssertXML - main structure that holds parsed XML.
 type AssertXML struct {
-	t   testing.TB
+	t   TestingT
 	xml *xmlpath.Node
 }
 
 // AssertNode - structure for asserting XML node.
 type AssertNode struct {
-	t     testing.TB
+	t     TestingT
 	found bool
 	path  string
 	value string
@@ -55,26 +54,26 @@ type AssertNode struct {
 type XMLAssertFunc func(xml *AssertXML)
 
 // FileHas loads XML from file and runs user callback for testing its nodes.
-func FileHas(tb testing.TB, filename string, xmlAssert XMLAssertFunc) {
-	tb.Helper()
+func FileHas(t TestingT, filename string, xmlAssert XMLAssertFunc) {
+	t.Helper()
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
-		assert.Failf(tb, "failed to read file '%s': %s", filename, err.Error())
+		assert.Failf(t, "failed to read file '%s': %s", filename, err.Error())
 	} else {
-		Has(tb, data, xmlAssert)
+		Has(t, data, xmlAssert)
 	}
 }
 
 // Has loads XML from byte slice and runs user callback for testing its nodes.
-func Has(tb testing.TB, data []byte, xmlAssert XMLAssertFunc) {
-	tb.Helper()
+func Has(t TestingT, data []byte, xmlAssert XMLAssertFunc) {
+	t.Helper()
 	xml, err := xmlpath.Parse(bytes.NewReader(data))
 	body := &AssertXML{
-		t:   tb,
+		t:   t,
 		xml: xml,
 	}
 	if err != nil {
-		assert.Failf(tb, "data has invalid XML: %s", err.Error())
+		assert.Failf(t, "data has invalid XML: %s", err.Error())
 	} else {
 		xmlAssert(body)
 	}
