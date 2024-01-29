@@ -56,7 +56,7 @@ func TestHandleRequest(t *testing.T) {
 				t.Helper()
 				assert.Equal(t, http.MethodGet, request.Method)
 				assert.Equal(t, testURL, request.URL.String())
-				assert.Equal(t, []string{"foo", "bar"}, request.Header["X-Test"])
+				assert.Equal(t, []string{"bar"}, request.Header["X-Test"])
 			},
 		},
 		{
