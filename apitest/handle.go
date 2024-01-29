@@ -9,25 +9,25 @@ import (
 // RequestOption can be used to tune up http.Request.
 type RequestOption func(r *http.Request)
 
-// WithHeader option adds specific header to the request.
+// WithHeader option overrides specific header to the request.
 func WithHeader(key, value string) RequestOption {
 	return func(r *http.Request) {
-		r.Header.Add(key, value)
+		r.Header.Set(key, value)
 	}
 }
 
-// WithContentType option adds Content-Type header to the request.
+// WithContentType option overrides Content-Type header to the request.
 func WithContentType(contentType string) RequestOption {
 	return func(r *http.Request) {
-		r.Header.Add("Content-Type", contentType)
+		r.Header.Set("Content-Type", contentType)
 	}
 }
 
-// WithJSONContentType option adds Content-Type header to the request
+// WithJSONContentType option overrides Content-Type header to the request
 // with "application/json" content type.
 func WithJSONContentType() RequestOption {
 	return func(r *http.Request) {
-		r.Header.Add("Content-Type", "application/json; charset=utf-8")
+		r.Header.Set("Content-Type", "application/json; charset=utf-8")
 	}
 }
 
