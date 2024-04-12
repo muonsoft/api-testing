@@ -38,6 +38,7 @@ func NewAssertJSON(t TestingT, message string, data interface{}) *AssertJSON {
 type JSONAssertFunc func(json *AssertJSON)
 
 // FileHas loads JSON from file and runs user callback for testing its nodes.
+// Returns false if assertion has failed.
 func FileHas(t TestingT, filename string, jsonAssert JSONAssertFunc) bool {
 	t.Helper()
 
@@ -52,12 +53,11 @@ func FileHas(t TestingT, filename string, jsonAssert JSONAssertFunc) bool {
 }
 
 // Has - loads JSON from byte slice and runs user callback for testing its nodes.
+// Returns false if assertion has failed.
 func Has(t TestingT, data []byte, jsonAssert JSONAssertFunc) bool {
 	t.Helper()
 	body := &AssertJSON{t: t}
-	body.assert(data, jsonAssert)
-
-	return !t.Failed()
+	return body.assert(data, jsonAssert)
 }
 
 // Node searches for JSON node by JSON Path Syntax. Returns struct for asserting the node values.
@@ -114,14 +114,18 @@ func (j *AssertJSON) Atf(format string, a ...interface{}) *AssertJSON {
 	return j.At(fmt.Sprintf(format, a...))
 }
 
-func (j *AssertJSON) assert(data []byte, jsonAssert JSONAssertFunc) {
+func (j *AssertJSON) assert(data []byte, jsonAssert JSONAssertFunc) bool {
 	j.t.Helper()
 	err := json.Unmarshal(data, &j.data)
 	if err != nil {
 		j.fail(fmt.Sprintf("data has invalid JSON: %s", err.Error()))
-	} else {
-		jsonAssert(j)
+
+		return false
 	}
+
+	jsonAssert(j)
+
+	return !j.t.Failed()
 }
 
 func (j *AssertJSON) fail(message string, msgAndArgs ...interface{}) {
