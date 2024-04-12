@@ -16,7 +16,7 @@ import (
 )
 
 func TestFileHas(t *testing.T) {
-	assertjson.FileHas(t, "./../test/testdata/object.json", func(json *assertjson.AssertJSON) {
+	res := assertjson.FileHas(t, "./../test/testdata/object.json", func(json *assertjson.AssertJSON) {
 		// common assertions
 		json.Node("nullNode").Exists()
 		json.Node("notExistingNode").DoesNotExist()
@@ -244,6 +244,8 @@ func TestFileHas(t *testing.T) {
 		// debug helpers
 		json.Node("bookstore", "books", 1).Print()
 	})
+
+	assert.True(t, res)
 }
 
 func TestHas(t *testing.T) {
@@ -2787,9 +2789,10 @@ func TestHas(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			tester := &mock.Tester{}
 
-			assertjson.Has(tester, []byte(test.json), test.assert)
+			res := assertjson.Has(tester, []byte(test.json), test.assert)
 
 			tester.AssertContains(t, test.wantMessages)
+			assert.False(t, res)
 		})
 	}
 }
@@ -2807,11 +2810,12 @@ func TestAssertNode_Exists(t *testing.T) {
 			tester := &mock.Tester{}
 
 			var got bool
-			assertjson.Has(tester, []byte(test.json), func(json *assertjson.AssertJSON) {
+			res := assertjson.Has(tester, []byte(test.json), func(json *assertjson.AssertJSON) {
 				got = json.Node("key").Exists()
 			})
 
 			assert.Equal(t, test.want, got)
+			assert.Equal(t, test.want, res)
 		})
 	}
 }
