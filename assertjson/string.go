@@ -73,9 +73,9 @@ func (node *AssertNode) IsStringWithLength(length int, msgAndArgs ...interface{}
 
 // IsStringWithLengthInRange asserts that the JSON node has a string value with length in a given range.
 // Deprecated: use IsString().WithLengthGreaterThanOrEqual().WithLengthLessThanOrEqual() instead.
-func (node *AssertNode) IsStringWithLengthInRange(min int, max int, msgAndArgs ...interface{}) {
+func (node *AssertNode) IsStringWithLengthInRange(vmin int, vmax int, msgAndArgs ...interface{}) {
 	node.t.Helper()
-	node.IsString().WithLengthGreaterThanOrEqual(min, msgAndArgs...).WithLengthLessThanOrEqual(max, msgAndArgs...)
+	node.IsString().WithLengthGreaterThanOrEqual(vmin, msgAndArgs...).WithLengthLessThanOrEqual(vmax, msgAndArgs...)
 }
 
 // AssertString asserts that the JSON node has a string value and it is satisfied by the user function assertFunc.

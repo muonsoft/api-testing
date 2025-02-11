@@ -112,10 +112,10 @@ func (node *AssertNode) IsNumberLessThanOrEqual(value float64, msgAndArgs ...int
 
 // IsNumberInRange asserts that the JSON node has a number with value in the given range.
 // Deprecated: use IsNumber().GreaterThanOrEqual().LessThanOrEqual() instead.
-func (node *AssertNode) IsNumberInRange(min, max float64, msgAndArgs ...interface{}) {
+func (node *AssertNode) IsNumberInRange(vmin, vmax float64, msgAndArgs ...interface{}) {
 	node.t.Helper()
-	node.IsNumber().GreaterThanOrEqual(min, msgAndArgs...)
-	node.IsNumber().LessThanOrEqual(max, msgAndArgs...)
+	node.IsNumber().GreaterThanOrEqual(vmin, msgAndArgs...)
+	node.IsNumber().LessThanOrEqual(vmax, msgAndArgs...)
 }
 
 // NumberAssertion is used to build a chain of assertions for the numeric node.

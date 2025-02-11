@@ -1,6 +1,3 @@
-run:
-  skip-dirs:
-    - var
 linters:
   enable:
     - asciicheck
@@ -13,7 +10,6 @@ linters:
     - durationcheck
     - errcheck
     - errorlint
-    - exportloopref
     - forbidigo
     - funlen
     - gci
@@ -44,7 +40,6 @@ linters:
     - prealloc
     - predeclared
     - promlinter
-    - revive
     - rowserrcheck
     - sqlclosecheck
     - stylecheck
@@ -59,6 +54,8 @@ linters:
     - whitespace
 
 issues:
+  exclude-dirs:
+    - var
   exclude-rules:
     # Exclude some linters from running on tests files.
     - path: _test\.go
@@ -90,3 +87,6 @@ linters-settings:
         allow:
           - $gostd
           - github.com
+  gosec:
+    excludes:
+      - G115
