@@ -54,18 +54,22 @@ type AssertNode struct {
 type XMLAssertFunc func(xml *AssertXML)
 
 // FileHas loads XML from file and runs user callback for testing its nodes.
-func FileHas(t TestingT, filename string, xmlAssert XMLAssertFunc) {
+// Returns false if assertion has failed.
+func FileHas(t TestingT, filename string, xmlAssert XMLAssertFunc) bool {
 	t.Helper()
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		assert.Failf(t, "failed to read file '%s': %s", filename, err.Error())
-	} else {
-		Has(t, data, xmlAssert)
+
+		return false
 	}
+
+	return Has(t, data, xmlAssert)
 }
 
 // Has loads XML from byte slice and runs user callback for testing its nodes.
-func Has(t TestingT, data []byte, xmlAssert XMLAssertFunc) {
+// Returns false if assertion has failed.
+func Has(t TestingT, data []byte, xmlAssert XMLAssertFunc) bool {
 	t.Helper()
 	xml, err := xmlpath.Parse(bytes.NewReader(data))
 	body := &AssertXML{
@@ -74,9 +78,13 @@ func Has(t TestingT, data []byte, xmlAssert XMLAssertFunc) {
 	}
 	if err != nil {
 		assert.Failf(t, "data has invalid XML: %s", err.Error())
-	} else {
-		xmlAssert(body)
+
+		return false
 	}
+
+	xmlAssert(body)
+
+	return !t.Failed()
 }
 
 // Node searches for XML node by XML Path Syntax. Returns struct for asserting the node values.
