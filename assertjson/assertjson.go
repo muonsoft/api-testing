@@ -19,7 +19,6 @@ type TestingT interface {
 	Helper()
 	Errorf(format string, args ...interface{})
 	Log(args ...interface{})
-	Failed() bool
 }
 
 // AssertJSON - main structure that holds parsed JSON.
@@ -38,26 +37,21 @@ func NewAssertJSON(t TestingT, message string, data interface{}) *AssertJSON {
 type JSONAssertFunc func(json *AssertJSON)
 
 // FileHas loads JSON from file and runs user callback for testing its nodes.
-// Returns false if assertion has failed.
-func FileHas(t TestingT, filename string, jsonAssert JSONAssertFunc) bool {
+func FileHas(t TestingT, filename string, jsonAssert JSONAssertFunc) {
 	t.Helper()
-
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		assert.Fail(t, fmt.Sprintf(`failed to read file "%s": %s`, filename, err.Error()))
-
-		return false
+	} else {
+		Has(t, data, jsonAssert)
 	}
-
-	return Has(t, data, jsonAssert)
 }
 
 // Has - loads JSON from byte slice and runs user callback for testing its nodes.
-// Returns false if assertion has failed.
-func Has(t TestingT, data []byte, jsonAssert JSONAssertFunc) bool {
+func Has(t TestingT, data []byte, jsonAssert JSONAssertFunc) {
 	t.Helper()
 	body := &AssertJSON{t: t}
-	return body.assert(data, jsonAssert)
+	body.assert(data, jsonAssert)
 }
 
 // Node searches for JSON node by JSON Path Syntax. Returns struct for asserting the node values.
@@ -114,18 +108,14 @@ func (j *AssertJSON) Atf(format string, a ...interface{}) *AssertJSON {
 	return j.At(fmt.Sprintf(format, a...))
 }
 
-func (j *AssertJSON) assert(data []byte, jsonAssert JSONAssertFunc) bool {
+func (j *AssertJSON) assert(data []byte, jsonAssert JSONAssertFunc) {
 	j.t.Helper()
 	err := json.Unmarshal(data, &j.data)
 	if err != nil {
 		j.fail(fmt.Sprintf("data has invalid JSON: %s", err.Error()))
-
-		return false
+	} else {
+		jsonAssert(j)
 	}
-
-	jsonAssert(j)
-
-	return !j.t.Failed()
 }
 
 func (j *AssertJSON) fail(message string, msgAndArgs ...interface{}) {
