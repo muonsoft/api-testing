@@ -2734,17 +2734,6 @@ func TestHas(t *testing.T) {
 				`failed to find JSON node "a.b": [b] not found`,
 			},
 		},
-		// debug helpers
-		{
-			name: "print json node",
-			json: `{"a": {"b": {"c": ["value"]}}}`,
-			assert: func(json *assertjson.AssertJSON) {
-				json.Node("a", "b").Print()
-			},
-			wantMessages: []string{
-				`JSON node at "a.b"`,
-			},
-		},
 		// deprecated behaviour: seek by json pointer path
 		{
 			name: "deprecated: json pointer path",
@@ -2790,9 +2779,42 @@ func TestHas(t *testing.T) {
 			tester := &mock.Tester{}
 
 			res := assertjson.Has(tester, []byte(test.json), test.assert)
+			wantRes := len(test.wantMessages) == 0
 
 			tester.AssertContains(t, test.wantMessages)
-			assert.False(t, res)
+
+			assert.Equal(t, wantRes, res)
+		})
+	}
+}
+
+func TestPrint(t *testing.T) {
+	tests := []struct {
+		name         string
+		json         string
+		assert       assertjson.JSONAssertFunc
+		wantMessages []string
+	}{
+		// debug helpers
+		{
+			name: "print json node",
+			json: `{"a": {"b": {"c": ["value"]}}}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("a", "b").Print()
+			},
+			wantMessages: []string{
+				`JSON node at "a.b"`,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			tester := &mock.Tester{}
+
+			assertjson.Has(tester, []byte(test.json), test.assert)
+
+			tester.AssertContains(t, test.wantMessages)
 		})
 	}
 }
