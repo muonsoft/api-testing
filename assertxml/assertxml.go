@@ -30,7 +30,7 @@ package assertxml
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/xmlpath.v2"
@@ -56,7 +56,7 @@ type XMLAssertFunc func(xml *AssertXML)
 // FileHas loads XML from file and runs user callback for testing its nodes.
 func FileHas(t TestingT, filename string, xmlAssert XMLAssertFunc) {
 	t.Helper()
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		assert.Failf(t, "failed to read file '%s': %s", filename, err.Error())
 	} else {

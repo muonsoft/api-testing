@@ -1,6 +1,6 @@
 module github.com/muonsoft/api-testing
 
-go 1.13
+go 1.16
 
 require (
 	github.com/gofrs/uuid v4.4.0+incompatible

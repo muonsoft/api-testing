@@ -5,7 +5,7 @@ package assertjson
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 
@@ -39,7 +39,7 @@ type JSONAssertFunc func(json *AssertJSON)
 // FileHas loads JSON from file and runs user callback for testing its nodes.
 func FileHas(t TestingT, filename string, jsonAssert JSONAssertFunc) {
 	t.Helper()
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		assert.Fail(t, fmt.Sprintf(`failed to read file "%s": %s`, filename, err.Error()))
 	} else {
