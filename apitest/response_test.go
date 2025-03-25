@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/muonsoft/api-testing/apitest"
 	"github.com/muonsoft/api-testing/assertjson"
 	"github.com/muonsoft/api-testing/internal/mock"

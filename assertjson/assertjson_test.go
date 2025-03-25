@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/muonsoft/api-testing/assertjson"
 	"github.com/muonsoft/api-testing/internal/mock"
 	"github.com/stretchr/testify/assert"
@@ -2286,7 +2286,7 @@ func TestHas(t *testing.T) {
 				json.Node("key").IsJWT(getJWTSecret)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "key" is JWT: token contains an invalid number of segments`,
+				`failed asserting that JSON node "key" is JWT: token is malformed: token contains an invalid number of segments`,
 			},
 		},
 		{
@@ -2296,7 +2296,7 @@ func TestHas(t *testing.T) {
 				json.Node("key").IsJWT(getJWTSecret)
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "key" is JWT: signature is invalid`,
+				`failed asserting that JSON node "key" is JWT: token signature is invalid: signature is invalid`,
 			},
 		},
 		{
@@ -2495,7 +2495,7 @@ func TestHas(t *testing.T) {
 				json.Node().IsJWT(getJWTSecret).WithExpiresAt()
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "" is JWT: Token is expired`,
+				`failed asserting that JSON node "" is JWT: token has invalid claims: invalid type for claim: exp is invalid`,
 			},
 		},
 		{
@@ -2532,7 +2532,7 @@ func TestHas(t *testing.T) {
 				json.Node().IsJWT(getJWTSecret).WithNotBefore()
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "" is JWT: Token is not valid yet`,
+				`failed asserting that JSON node "" is JWT: token has invalid claims: invalid type for claim: nbf is invalid`,
 			},
 		},
 		{
@@ -2569,7 +2569,7 @@ func TestHas(t *testing.T) {
 				json.Node().IsJWT(getJWTSecret).WithIssuedAt()
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "" is JWT: Token used before issued`,
+				`failed asserting that JSON node "": is JWT with issued at ("iat") : number is expected`,
 			},
 		},
 		{
