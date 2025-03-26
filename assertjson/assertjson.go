@@ -19,6 +19,7 @@ type TestingT interface {
 	Helper()
 	Errorf(format string, args ...interface{})
 	Log(args ...interface{})
+	Failed() bool
 }
 
 // AssertJSON - main structure that holds parsed JSON.
@@ -37,21 +38,26 @@ func NewAssertJSON(t TestingT, message string, data interface{}) *AssertJSON {
 type JSONAssertFunc func(json *AssertJSON)
 
 // FileHas loads JSON from file and runs user callback for testing its nodes.
-func FileHas(t TestingT, filename string, jsonAssert JSONAssertFunc) {
+func FileHas(t TestingT, filename string, jsonAssert JSONAssertFunc) bool {
 	t.Helper()
+
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		assert.Fail(t, fmt.Sprintf(`failed to read file "%s": %s`, filename, err.Error()))
-	} else {
-		Has(t, data, jsonAssert)
+
+		return false
 	}
+
+	return Has(t, data, jsonAssert)
 }
 
 // Has - loads JSON from byte slice and runs user callback for testing its nodes.
-func Has(t TestingT, data []byte, jsonAssert JSONAssertFunc) {
+func Has(t TestingT, data []byte, jsonAssert JSONAssertFunc) bool {
 	t.Helper()
 	body := &AssertJSON{t: t}
 	body.assert(data, jsonAssert)
+
+	return !t.Failed()
 }
 
 // Node searches for JSON node by JSON Path Syntax. Returns struct for asserting the node values.
