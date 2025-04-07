@@ -59,7 +59,7 @@ import (
     "testing"
     "time"
 
-    "github.com/gofrs/uuid"
+    "github.com/gofrs/uuid/v5"
     "github.com/golang-jwt/jwt/v5"
     "github.com/muonsoft/api-testing/assertjson"
     "github.com/stretchr/testify/assert"
