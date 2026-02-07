@@ -15,6 +15,7 @@
   - [Массивы и объекты](#assertjson---массивы-и-объекты)
   - [Пути и переиспользуемые проверки](#assertjson---пути-и-переиспользуемые-проверки)
   - [JWT](#assertjson---jwt)
+  - [JSON Lines (NDJSON)](#assertjson---json-lines-ndjson)
   - [Получение значений и отладка](#assertjson---получение-значений-и-отладка)
 - [assertxml](#assertxml)
   - [Базовые проверки XML](#assertxml---базовые-проверки-xml)
@@ -239,6 +240,32 @@ assertjson.Has(t, data, func(json *assertjson.AssertJSON) {
 // Проверка JWT из строки (без контекста JSON)
 assertjson.IsJWT(t, rawJWTString, keyFunc).WithPayload(func(json *assertjson.AssertJSON) {
     json.Node("name").IsString().EqualTo("John Doe")
+})
+```
+
+### assertjson — JSON Lines (NDJSON)
+
+Данные в формате JSON Lines (одна строка JSON на строку текста) проверяются через `LinesHas` или `Lines(t, data).Has(...)`. Пустые строки пропускаются.
+
+```go
+// Пакетная функция (аналог Has для одного JSON)
+assertjson.LinesHas(t, body, func(lines *assertjson.AssertJSONLines) {
+    lines.At(0).Node("id").EqualToTheInteger(1)
+    lines.At(0).Node("name").EqualToTheString("Alice")
+    lines.At(1).Node("id").EqualToTheInteger(2)
+    lines.At(1).Node("role").EqualToTheString("admin")
+    lines.WithLength(2)
+})
+
+// Метод на результате Lines
+assertjson.Lines(t, body).Has(func(lines *assertjson.AssertJSONLines) {
+    lines.At(0).Node("event").EqualToTheString("created")
+    lines.At(1).Node("event").EqualToTheString("updated")
+})
+
+// Файл
+assertjson.FileLinesHas(t, "events.ndjson", func(lines *assertjson.AssertJSONLines) {
+    lines.At(0).Node("event").EqualToTheString("created")
 })
 ```
 

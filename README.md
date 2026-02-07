@@ -97,6 +97,17 @@ func TestYourAPI(t *testing.T) {
 }
 ```
 
+**JSON Lines (NDJSON):** use `LinesHas` or `Lines(t, data).Has(...)` to assert over multiple JSON objects, one per line:
+
+```go
+assertjson.LinesHas(t, body, func(lines *assertjson.AssertJSONLines) {
+    lines.At(0).Node("id").EqualToTheInteger(1)
+    lines.At(0).Node("name").EqualToTheString("Alice")
+    lines.At(1).Node("role").EqualToTheString("admin")
+    lines.WithLength(2)
+})
+```
+
 Подробные примеры по темам (строки, числа, массивы, объекты, UUID, время, JWT и др.) — в [EXAMPLES.md](EXAMPLES.md). Полный API — [pkg.go.dev/github.com/muonsoft/api-testing/assertjson](https://pkg.go.dev/github.com/muonsoft/api-testing/assertjson).
 
 ---
