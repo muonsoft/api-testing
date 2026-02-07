@@ -10,6 +10,7 @@ import (
 )
 
 // IsArrayWithElementsCount asserts that the JSON node is an array with given elements count.
+//
 // Deprecated: use IsArray().WithLength() instead.
 func (node *AssertNode) IsArrayWithElementsCount(count int, msgAndArgs ...interface{}) {
 	node.t.Helper()

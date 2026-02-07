@@ -10,6 +10,7 @@ import (
 )
 
 // IsObjectWithPropertiesCount asserts that the JSON node is an object with given properties count.
+//
 // Deprecated: use IsObject().WithPropertiesCount() instead.
 func (node *AssertNode) IsObjectWithPropertiesCount(count int, msgAndArgs ...interface{}) {
 	node.t.Helper()

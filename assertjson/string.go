@@ -34,6 +34,7 @@ func (node *AssertNode) IsString(msgAndArgs ...interface{}) *StringAssertion {
 }
 
 // EqualToTheString asserts that the JSON node has a string value equals to the given value.
+//
 // Deprecated: use IsString().EqualTo() instead.
 func (node *AssertNode) EqualToTheString(expectedValue string, msgAndArgs ...interface{}) {
 	node.t.Helper()
@@ -65,6 +66,7 @@ func (node *AssertNode) DoesNotContain(contain string, msgAndArgs ...interface{}
 }
 
 // IsStringWithLength asserts that the JSON node has a string value with length equal to the given value.
+//
 // Deprecated: use IsString().WithLength() instead.
 func (node *AssertNode) IsStringWithLength(length int, msgAndArgs ...interface{}) {
 	node.t.Helper()
@@ -72,6 +74,7 @@ func (node *AssertNode) IsStringWithLength(length int, msgAndArgs ...interface{}
 }
 
 // IsStringWithLengthInRange asserts that the JSON node has a string value with length in a given range.
+//
 // Deprecated: use IsString().WithLengthGreaterThanOrEqual().WithLengthLessThanOrEqual() instead.
 func (node *AssertNode) IsStringWithLengthInRange(vmin int, vmax int, msgAndArgs ...interface{}) {
 	node.t.Helper()
@@ -79,6 +82,7 @@ func (node *AssertNode) IsStringWithLengthInRange(vmin int, vmax int, msgAndArgs
 }
 
 // AssertString asserts that the JSON node has a string value and it is satisfied by the user function assertFunc.
+//
 // Deprecated: use IsString().Assert() instead.
 func (node *AssertNode) AssertString(assertFunc func(t testing.TB, value string)) {
 	node.t.Helper()

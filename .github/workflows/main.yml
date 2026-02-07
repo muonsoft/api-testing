@@ -24,7 +24,7 @@ jobs:
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.63
+          version: v2.61
 
       - name: Run tests
         run: go test -v $(go list ./... | grep -v vendor)
