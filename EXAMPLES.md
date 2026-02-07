@@ -173,6 +173,24 @@ assertjson.Has(t, data, func(json *assertjson.AssertJSON) {
         node.IsString().EqualTo("arrayValue")
     })
 
+    // массив строк (IsStrings)
+    json.Node("arrayNode").IsStrings()
+    json.Node("arrayNode").IsStrings().EqualTo("arrayValue")
+    json.Node("arrayNode").IsStrings().WithUniqueValues()
+    json.Node("arrayNode").IsStrings().Contains("arrayValue")
+    json.Node("arrayNode").IsStrings().WithLength(1)
+    json.Node("arrayNode").IsStrings().WithLengthGreaterThan(0)
+    json.Node("arrayNode").IsStrings().WithLengthLessThan(2)
+    json.Node("arrayNode").IsStrings().That(func(values []string) error {
+        if len(values) == 0 {
+            return fmt.Errorf("expected non-empty array")
+        }
+        return nil
+    })
+    json.Node("arrayNode").IsStrings().Assert(func(tb testing.TB, values []string) {
+        assert.NotEmpty(tb, values)
+    })
+
     json.Node("objectNode").IsObject()
     json.Node("objectNode").IsObject().WithPropertiesCount(1)
     json.Node("objectNode").IsObject().WithPropertiesCountGreaterThan(0)
