@@ -95,6 +95,10 @@ assertjson.Has(t, data, func(json *assertjson.AssertJSON) {
     json.Node("stringNode").IsString().WithLength(11)
     json.Node("stringNode").IsString().WithLengthGreaterThan(10)
     json.Node("stringNode").IsString().WithLengthLessThan(12)
+    json.Node("stringNode").IsString().WithPrefix("string")
+    json.Node("stringNode").IsString().WithSuffix("Value")
+    json.Node("idNode").IsString().WithInteger().EqualTo(42)
+    json.Node("amountNode").IsString().WithNumber().EqualTo(12.5)
     json.Node("stringNode").IsString().That(func(s string) error {
         if s != "stringValue" {
             return fmt.Errorf("invalid")

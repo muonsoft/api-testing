@@ -238,6 +238,91 @@ func (a *StringAssertion) NotContains(value string, msgAndArgs ...interface{}) *
 	return a
 }
 
+// WithPrefix asserts that the JSON node has a string value with the given prefix.
+func (a *StringAssertion) WithPrefix(prefix string, msgAndArgs ...interface{}) *StringAssertion {
+	if a == nil {
+		return nil
+	}
+	a.t.Helper()
+	if !strings.HasPrefix(a.value, prefix) {
+		a.fail(
+			fmt.Sprintf(`has prefix "%s", actual is "%s"`, prefix, a.value),
+			msgAndArgs...,
+		)
+	}
+
+	return a
+}
+
+// WithSuffix asserts that the JSON node has a string value with the given suffix.
+func (a *StringAssertion) WithSuffix(suffix string, msgAndArgs ...interface{}) *StringAssertion {
+	if a == nil {
+		return nil
+	}
+	a.t.Helper()
+	if !strings.HasSuffix(a.value, suffix) {
+		a.fail(
+			fmt.Sprintf(`has suffix "%s", actual is "%s"`, suffix, a.value),
+			msgAndArgs...,
+		)
+	}
+
+	return a
+}
+
+// WithInteger asserts that the JSON node has a string value that represents a decimal integer.
+// It returns IntegerAssertion to execute a chain of assertions for the parsed value.
+func (a *StringAssertion) WithInteger(msgAndArgs ...interface{}) *IntegerAssertion {
+	if a == nil {
+		return nil
+	}
+	a.t.Helper()
+	parsed, err := strconv.ParseInt(a.value, 10, 64)
+	if err != nil {
+		a.fail(
+			fmt.Sprintf(`is string representing integer, actual is "%s"`, a.value),
+			msgAndArgs...,
+		)
+		return nil
+	}
+	if int64(int(parsed)) != parsed {
+		a.fail(
+			fmt.Sprintf(`is string representing integer (overflow), actual is "%s"`, a.value),
+			msgAndArgs...,
+		)
+		return nil
+	}
+	return &IntegerAssertion{
+		t:       a.t,
+		message: a.message,
+		path:    a.path,
+		value:   int(parsed),
+	}
+}
+
+// WithNumber asserts that the JSON node has a string value that represents a number (integer or float).
+// It returns NumberAssertion to execute a chain of assertions for the parsed value.
+func (a *StringAssertion) WithNumber(msgAndArgs ...interface{}) *NumberAssertion {
+	if a == nil {
+		return nil
+	}
+	a.t.Helper()
+	parsed, err := strconv.ParseFloat(a.value, 64)
+	if err != nil {
+		a.fail(
+			fmt.Sprintf(`is string representing number, actual is "%s"`, a.value),
+			msgAndArgs...,
+		)
+		return nil
+	}
+	return &NumberAssertion{
+		t:       a.t,
+		message: a.message,
+		path:    a.path,
+		value:   parsed,
+	}
+}
+
 // WithLength asserts that the JSON node has a string value with length equal to the given value.
 func (a *StringAssertion) WithLength(length int, msgAndArgs ...interface{}) *StringAssertion {
 	if a == nil {
