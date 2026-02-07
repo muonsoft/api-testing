@@ -1,3 +1,4 @@
+version: "2"
 linters:
   enable:
     - asciicheck
@@ -8,33 +9,24 @@ linters:
     - depguard
     - dogsled
     - durationcheck
-    - errcheck
     - errorlint
     - forbidigo
     - funlen
-    - gci
     - gocognit
     - goconst
     - gocritic
     - gocyclo
     - godot
     - godox
-    - gofmt
-    - gofumpt
-    - goimports
     - gomodguard
     - goprintffuncname
     - gosec
-    - gosimple
-    - govet
     - importas
-    - ineffassign
     - makezero
     - misspell
     - nakedret
     - nestif
     - nilerr
-    - noctx
     - noctx
     - nolintlint
     - prealloc
@@ -42,51 +34,68 @@ linters:
     - promlinter
     - rowserrcheck
     - sqlclosecheck
-    - stylecheck
-    - tenv
+    - staticcheck
     - testpackage
     - thelper
     - tparallel
-    - typecheck
     - unconvert
     - unparam
-    - unused
     - whitespace
-
-issues:
-  exclude-dirs:
-    - var
-  exclude-rules:
-    # Exclude some linters from running on tests files.
-    - path: _test\.go
-      linters:
-        - funlen
-        - lll
-        - gocyclo
-        - errcheck
-        - dupl
-        - gosec
-        - scopelint
-        - gochecknoglobals
-        - goerr113
-
-linters-settings:
-  depguard:
+  settings:
+    depguard:
+      rules:
+        main:
+          files:
+            - $all
+            - '!$test'
+            - '!**/test/**/*'
+          allow:
+            - $gostd
+            - github.com
+            - gopkg.in
+        test:
+          files:
+            - $test
+          allow:
+            - $gostd
+            - github.com
+    gosec:
+      excludes:
+        - G115
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
     rules:
-      main:
-        files:
-          - $all
-          - "!$test"
-          - "!**/test/**/*"
-        allow:
-          - $gostd
-          - github.com
-      test:
-        files:
-          - "$test"
-        allow:
-          - $gostd
-          - github.com
-  gosec:
-    excludes:
-      - G115
+      - linters:
+          - dupl
+          - err113
+          - errcheck
+          - funlen
+          - gochecknoglobals
+          - gocyclo
+          - gosec
+          - lll
+          - scopelint
+        path: _test\.go
+    paths:
+      - var
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - var
+      - third_party$
+      - builtin$
+      - examples$

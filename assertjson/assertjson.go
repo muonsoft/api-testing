@@ -80,6 +80,7 @@ func (j *AssertJSON) Node(path ...interface{}) *AssertNode {
 
 // Nodef searches for JSON node by JSON Path Syntax. Returns struct for asserting the node values.
 // It calculates path by applying fmt.Sprintf function.
+//
 // Deprecated: use Node() with multiple arguments.
 func (j *AssertJSON) Nodef(format string, a ...interface{}) *AssertNode {
 	j.t.Helper()
@@ -108,6 +109,7 @@ func (j *AssertJSON) At(path ...interface{}) *AssertJSON {
 
 // Atf is used to test assertions on some node in a batch. It returns AssertJSON object on that node.
 // It calculates path by applying fmt.Sprintf function.
+//
 // Deprecated: use At() with multiple arguments.
 func (j *AssertJSON) Atf(format string, a ...interface{}) *AssertJSON {
 	j.t.Helper()

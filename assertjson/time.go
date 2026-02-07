@@ -235,7 +235,7 @@ func (a *TimeAssertion) AtDate(year int, month time.Month, day int, msgAndArgs .
 	begin := newDate(year, month, day)
 	end := begin.Add(24 * time.Hour)
 
-	if !((a.value.After(begin) || a.value.Equal(begin)) && a.value.Before(end)) {
+	if (!a.value.After(begin) && !a.value.Equal(begin)) || !a.value.Before(end) {
 		a.fail(
 			fmt.Sprintf(
 				`is time at date "%s", actual is "%s"`,

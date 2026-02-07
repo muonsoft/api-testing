@@ -165,6 +165,28 @@ func TestFileHas(t *testing.T) {
 			node.IsString().EqualTo("arrayValue")
 		})
 
+		// array of strings assertions
+		json.Node("arrayNode").IsStrings()
+		json.Node("arrayNode").IsStrings().EqualTo("arrayValue")
+		json.Node("arrayNode").IsStrings().WithUniqueValues()
+		json.Node("arrayNode").IsStrings().Contains("arrayValue")
+		json.Node("arrayNode").IsStrings().WithLength(1)
+		json.Node("arrayNode").IsStrings().WithLengthGreaterThan(0)
+		json.Node("arrayNode").IsStrings().WithLengthGreaterThanOrEqual(1)
+		json.Node("arrayNode").IsStrings().WithLengthLessThan(2)
+		json.Node("arrayNode").IsStrings().WithLengthLessThanOrEqual(1)
+		json.Node("arrayNode").IsStrings().That(func(values []string) error {
+			if len(values) != 1 || values[0] != "arrayValue" {
+				return fmt.Errorf("expected [arrayValue]")
+			}
+			return nil
+		})
+		json.Node("arrayNode").IsStrings().Assert(func(tb testing.TB, values []string) {
+			tb.Helper()
+			assert.Equal(tb, []string{"arrayValue"}, values)
+		})
+		assert.Equal(t, 1, json.Node("arrayNode").IsStrings().Length())
+
 		// object assertions
 		json.Node("objectNode").IsObjectWithPropertiesCount(1)
 		json.Node("objectNode").IsObject()
@@ -1058,6 +1080,146 @@ func TestHas(t *testing.T) {
 			},
 		},
 		{
+			name: "JSON node is string with prefix",
+			json: `{"key": "value"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().WithPrefix("val")
+			},
+		},
+		{
+			name: "JSON node is string with prefix fails",
+			json: `{"key": "value"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().WithPrefix("foo")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": has prefix "foo", actual is "value"`,
+			},
+		},
+		{
+			name: "JSON node is string with suffix",
+			json: `{"key": "value"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().WithSuffix("lue")
+			},
+		},
+		{
+			name: "JSON node is string with suffix fails",
+			json: `{"key": "value"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().WithSuffix("foo")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": has suffix "foo", actual is "value"`,
+			},
+		},
+		{
+			name: "JSON node is string with integer",
+			json: `{"key": "123"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().WithInteger()
+			},
+		},
+		{
+			name: "JSON node is string with integer chain",
+			json: `{"key": "123"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().WithInteger().EqualTo(123).GreaterThan(122)
+			},
+		},
+		{
+			name: "JSON node is string with integer zero",
+			json: `{"key": "0"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().WithInteger()
+			},
+		},
+		{
+			name: "JSON node is string with integer negative",
+			json: `{"key": "-456"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().WithInteger()
+			},
+		},
+		{
+			name: "JSON node is string with integer fails",
+			json: `{"key": "12.3"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().WithInteger()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": is string representing integer, actual is "12.3"`,
+			},
+		},
+		{
+			name: "JSON node is string with integer fails non-numeric",
+			json: `{"key": "abc"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().WithInteger()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": is string representing integer, actual is "abc"`,
+			},
+		},
+		{
+			name: "JSON node is string with integer fails empty",
+			json: `{"key": ""}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().WithInteger()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": is string representing integer, actual is ""`,
+			},
+		},
+		{
+			name: "JSON node is string with number",
+			json: `{"key": "123"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().WithNumber()
+			},
+		},
+		{
+			name: "JSON node is string with number chain",
+			json: `{"key": "12.5"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().WithNumber().EqualTo(12.5).GreaterThan(12)
+			},
+		},
+		{
+			name: "JSON node is string with number float",
+			json: `{"key": "12.5"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().WithNumber()
+			},
+		},
+		{
+			name: "JSON node is string with number exponent",
+			json: `{"key": "-1e2"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().WithNumber()
+			},
+		},
+		{
+			name: "JSON node is string with number fails",
+			json: `{"key": "abc"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().WithNumber()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": is string representing number, actual is "abc"`,
+			},
+		},
+		{
+			name: "JSON node is string with number fails empty",
+			json: `{"key": ""}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsString().WithNumber()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": is string representing number, actual is ""`,
+			},
+		},
+		{
 			name: "JSON node is string with length",
 			json: `{"key": "value"}`,
 			assert: func(json *assertjson.AssertJSON) {
@@ -1344,6 +1506,132 @@ func TestHas(t *testing.T) {
 			},
 			wantMessages: []string{
 				`failed asserting that JSON node "key" is array`,
+			},
+		},
+		{
+			name: "JSON node is array of strings",
+			json: `{"key": ["a", "b", "c"]}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsStrings()
+			},
+		},
+		{
+			name: "JSON node is array of strings fails on not array",
+			json: `{"key": "value"}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsStrings()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key" is array of strings`,
+			},
+		},
+		{
+			name: "JSON node is array of strings fails on non-string element",
+			json: `{"key": ["a", 123, "c"]}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsStrings()
+			},
+			wantMessages: []string{
+				`element at index 1 is not string`,
+			},
+		},
+		{
+			name: "JSON node is array of strings equal to",
+			json: `{"key": ["a", "b", "c"]}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsStrings().EqualTo("a", "b", "c")
+			},
+		},
+		{
+			name: "JSON node is array of strings equal to fails",
+			json: `{"key": ["a", "b"]}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsStrings().EqualTo("a", "b", "c")
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key": equal to`,
+			},
+		},
+		{
+			name: "JSON node is array of strings with unique values",
+			json: `{"key": ["a", "b", "c"]}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsStrings().WithUniqueValues()
+			},
+		},
+		{
+			name: "JSON node is array of strings with unique values fails",
+			json: `{"key": ["a", "b", "a"]}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsStrings().WithUniqueValues()
+			},
+			wantMessages: []string{
+				`failed asserting that JSON node "key" is array of strings with unique values, duplicated elements`,
+			},
+		},
+		{
+			name: "JSON node is array of strings contains",
+			json: `{"key": ["a", "b", "c"]}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsStrings().Contains("b")
+			},
+		},
+		{
+			name: "JSON node is array of strings contains fails",
+			json: `{"key": ["a", "b", "c"]}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsStrings().Contains("x")
+			},
+			wantMessages: []string{
+				`array contains "x"`,
+			},
+		},
+		{
+			name: "JSON node is array of strings with length",
+			json: `{"key": ["a", "b"]}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsStrings().WithLength(2)
+			},
+		},
+		{
+			name: "JSON node is array of strings with length fails",
+			json: `{"key": ["a", "b"]}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsStrings().WithLength(3)
+			},
+			wantMessages: []string{
+				`is array of strings with length is 3, actual is 2`,
+			},
+		},
+		{
+			name: "JSON node is array of strings That",
+			json: `{"key": ["a"]}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsStrings().That(func(values []string) error {
+					if len(values) != 1 {
+						return fmt.Errorf("expected length 1")
+					}
+					return nil
+				})
+			},
+		},
+		{
+			name: "JSON node is array of strings That fails",
+			json: `{"key": ["a", "b"]}`,
+			assert: func(json *assertjson.AssertJSON) {
+				json.Node("key").IsStrings().That(func(values []string) error {
+					return fmt.Errorf("custom error")
+				})
+			},
+			wantMessages: []string{
+				`failed asserting JSON node "key": custom error`,
+			},
+		},
+		{
+			name: "JSON node is array of strings Length",
+			json: `{"key": ["a", "b", "c"]}`,
+			assert: func(json *assertjson.AssertJSON) {
+				assert.Equal(t, 3, json.Node("key").IsStrings().Length())
 			},
 		},
 		{
