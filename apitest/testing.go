@@ -6,4 +6,5 @@ type TestingT interface {
 	Error(args ...interface{})
 	Errorf(format string, args ...interface{})
 	Log(args ...interface{})
+	Failed() bool
 }

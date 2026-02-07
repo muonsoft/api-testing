@@ -7,25 +7,33 @@ import (
 )
 
 type Tester struct {
+	failed   bool
 	messages []string
 }
 
 func (tester *Tester) Helper() {}
 
 func (tester *Tester) Error(args ...interface{}) {
+	tester.failed = true
 	tester.messages = append(tester.messages, fmt.Sprint(args...))
 }
 
 func (tester *Tester) Errorf(format string, args ...interface{}) {
+	tester.failed = true
 	tester.messages = append(tester.messages, fmt.Sprintf(format, args...))
 }
 
 func (tester *Tester) Fatal(args ...interface{}) {
+	tester.failed = true
 	tester.messages = append(tester.messages, fmt.Sprint(args...))
 }
 
 func (tester *Tester) Log(args ...interface{}) {
 	tester.messages = append(tester.messages, fmt.Sprint(args...))
+}
+
+func (tester *Tester) Failed() bool {
+	return tester.failed
 }
 
 func (tester *Tester) AssertContains(t *testing.T, messages []string) {
