@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/muonsoft/api-testing/jwt"
 	"github.com/muonsoft/api-testing/assertjson"
 	"github.com/stretchr/testify/assert"
 )
@@ -84,7 +84,7 @@ func (a *JWTAssertion) WithPayload(jsonAssert assertjson.JSONAssertFunc) *JWTAss
 	jsonAssert(assertjson.NewAssertJSON(
 		a.t,
 		a.messagePrefix+`is JWT with payload: `,
-		map[string]interface{}(a.token.Claims.(jwt.MapClaims)),
+		map[string]interface{}(a.token.Claims),
 	))
 
 	return a
@@ -188,7 +188,7 @@ func (a *JWTAssertion) Assert(assertFunc func(tb testing.TB, token *jwt.Token)) 
 func (a *JWTAssertion) assertStringField(title string, name string, expected string, msgAndArgs ...interface{}) *JWTAssertion {
 	a.t.Helper()
 
-	raw, exist := a.token.Claims.(jwt.MapClaims)[name]
+	raw, exist := a.token.Claims[name]
 	if !exist {
 		return a.failOnMissingField(title, name, strconv.Quote(expected), msgAndArgs...)
 	}
@@ -208,7 +208,7 @@ func (a *JWTAssertion) assertStringField(title string, name string, expected str
 func (a *JWTAssertion) assertStringsField(title string, name string, expected []string, msgAndArgs ...interface{}) *JWTAssertion {
 	a.t.Helper()
 
-	raw, exist := a.token.Claims.(jwt.MapClaims)[name]
+	raw, exist := a.token.Claims[name]
 	if !exist {
 		return a.failOnMissingField(title, name, wrapArray(formatStrings(expected)), msgAndArgs...)
 	}
@@ -226,7 +226,7 @@ func (a *JWTAssertion) assertStringsField(title string, name string, expected []
 }
 
 func (a *JWTAssertion) assertTimeField(title string, name string) *TimeAssertion {
-	raw, exist := a.token.Claims.(jwt.MapClaims)[name]
+	raw, exist := a.token.Claims[name]
 	if !exist {
 		a.failOnMissingField(title, name, "")
 		return nil
