@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid/v5"
-	"github.com/golang-jwt/jwt/v5"
+	"github.com/muonsoft/api-testing/jwt"
 	"github.com/muonsoft/api-testing/assertjson"
 	"github.com/muonsoft/api-testing/internal/mock"
 	"github.com/stretchr/testify/assert"
@@ -2783,7 +2783,7 @@ func TestHas(t *testing.T) {
 				json.Node().IsJWT(getJWTSecret).WithExpiresAt()
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "" is JWT: token has invalid claims: invalid type for claim: exp is invalid`,
+				`is JWT with expires at ("exp") : number is expected`,
 			},
 		},
 		{
@@ -2820,7 +2820,7 @@ func TestHas(t *testing.T) {
 				json.Node().IsJWT(getJWTSecret).WithNotBefore()
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "" is JWT: token has invalid claims: invalid type for claim: nbf is invalid`,
+				`is JWT with not before ("nbf") : number is expected`,
 			},
 		},
 		{

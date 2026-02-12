@@ -234,7 +234,7 @@ assertjson.Has(t, data, func(json *assertjson.AssertJSON) {
 ```go
 import (
     "time"
-    "github.com/golang-jwt/jwt/v5"
+    "github.com/muonsoft/api-testing/jwt"
 )
 
 assertjson.Has(t, data, func(json *assertjson.AssertJSON) {
