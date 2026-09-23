@@ -1,6 +1,7 @@
 package apitest_test
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -406,7 +407,7 @@ func TestAssertResponse(t *testing.T) {
 			handler := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 				test.writeResponse(writer)
 			})
-			response := apitest.HandleRequest(tester, handler, httptest.NewRequest(http.MethodGet, "/", nil))
+			response := apitest.HandleRequest(tester, handler, httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", nil))
 
 			test.assert(response)
 
