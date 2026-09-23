@@ -1,6 +1,7 @@
 package apitest
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -79,7 +80,7 @@ func HandleDELETE(t TestingT, handler http.Handler, url string, options ...Reque
 
 func handleRequest(t TestingT, handler http.Handler, method, url string, body io.Reader, options ...RequestOption) *ResponseAssertion {
 	t.Helper()
-	request := httptest.NewRequest(method, url, body)
+	request := httptest.NewRequestWithContext(context.Background(), method, url, body)
 	for _, setUpRequest := range options {
 		setUpRequest(request)
 	}
