@@ -33,14 +33,6 @@ func (node *AssertNode) IsString(msgAndArgs ...interface{}) *StringAssertion {
 	return nil
 }
 
-// EqualToTheString asserts that the JSON node has a string value equals to the given value.
-//
-// Deprecated: use IsString().EqualTo() instead.
-func (node *AssertNode) EqualToTheString(expectedValue string, msgAndArgs ...interface{}) {
-	node.t.Helper()
-	node.IsString().EqualTo(expectedValue, msgAndArgs...)
-}
-
 // Matches asserts that the JSON node has a string value that matches the regular expression.
 func (node *AssertNode) Matches(regexp interface{}, msgAndArgs ...interface{}) {
 	node.t.Helper()
@@ -63,30 +55,6 @@ func (node *AssertNode) Contains(contain string, msgAndArgs ...interface{}) {
 func (node *AssertNode) DoesNotContain(contain string, msgAndArgs ...interface{}) {
 	node.t.Helper()
 	node.IsString().NotContains(contain, msgAndArgs...)
-}
-
-// IsStringWithLength asserts that the JSON node has a string value with length equal to the given value.
-//
-// Deprecated: use IsString().WithLength() instead.
-func (node *AssertNode) IsStringWithLength(length int, msgAndArgs ...interface{}) {
-	node.t.Helper()
-	node.IsString().WithLength(length, msgAndArgs...)
-}
-
-// IsStringWithLengthInRange asserts that the JSON node has a string value with length in a given range.
-//
-// Deprecated: use IsString().WithLengthGreaterThanOrEqual().WithLengthLessThanOrEqual() instead.
-func (node *AssertNode) IsStringWithLengthInRange(vmin int, vmax int, msgAndArgs ...interface{}) {
-	node.t.Helper()
-	node.IsString().WithLengthGreaterThanOrEqual(vmin, msgAndArgs...).WithLengthLessThanOrEqual(vmax, msgAndArgs...)
-}
-
-// AssertString asserts that the JSON node has a string value and it is satisfied by the user function assertFunc.
-//
-// Deprecated: use IsString().Assert() instead.
-func (node *AssertNode) AssertString(assertFunc func(t testing.TB, value string)) {
-	node.t.Helper()
-	node.IsString().Assert(assertFunc)
 }
 
 // StringAssertion is used to build a chain of assertions for the string node.

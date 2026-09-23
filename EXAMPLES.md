@@ -272,22 +272,22 @@ assertjson.IsJWT(t, rawJWTString, keyFunc).WithPayload(func(json *assertjson.Ass
 ```go
 // Пакетная функция (аналог Has для одного JSON)
 assertjson.LinesHas(t, body, func(lines *assertjson.AssertJSONLines) {
-    lines.At(0).Node("id").EqualToTheInteger(1)
-    lines.At(0).Node("name").EqualToTheString("Alice")
-    lines.At(1).Node("id").EqualToTheInteger(2)
-    lines.At(1).Node("role").EqualToTheString("admin")
+    lines.At(0).Node("id").IsInteger().EqualTo(1)
+    lines.At(0).Node("name").IsString().EqualTo("Alice")
+    lines.At(1).Node("id").IsInteger().EqualTo(2)
+    lines.At(1).Node("role").IsString().EqualTo("admin")
     lines.WithLength(2)
 })
 
 // Метод на результате Lines
 assertjson.Lines(t, body).Has(func(lines *assertjson.AssertJSONLines) {
-    lines.At(0).Node("event").EqualToTheString("created")
-    lines.At(1).Node("event").EqualToTheString("updated")
+    lines.At(0).Node("event").IsString().EqualTo("created")
+    lines.At(1).Node("event").IsString().EqualTo("updated")
 })
 
 // Файл
 assertjson.FileLinesHas(t, "events.ndjson", func(lines *assertjson.AssertJSONLines) {
-    lines.At(0).Node("event").EqualToTheString("created")
+    lines.At(0).Node("event").IsString().EqualTo("created")
 })
 ```
 

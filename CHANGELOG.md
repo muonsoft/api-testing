@@ -25,6 +25,10 @@ this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Removed
 
 - Direct dependency on `github.com/golang-jwt/jwt/v5`.
+- Deprecated `assertjson` APIs: legacy `AssertNode` helpers (`EqualToTheString`,
+  `IsNumberGreaterThan`, and similar), `Nodef` / `Atf`, UUID chain aliases
+  (`Nil`, `Version`, …), and JSON Pointer strings passed as a single path
+  argument to `Node` / `At`.
 
 ## [0.11.0] - 2026-02-07
 
