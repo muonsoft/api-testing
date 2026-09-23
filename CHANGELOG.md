@@ -19,6 +19,8 @@ this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - JWT assertion callbacks use `assertjson` types instead of `github.com/golang-jwt/jwt/v5`.
+- Module dependencies (`github.com/gofrs/uuid/v5`, `github.com/stretchr/testify`,
+  `golang.org/x/net`) and minimum Go version (`1.26`).
 
 ### Removed
 
