@@ -9,14 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// IsObjectWithPropertiesCount asserts that the JSON node is an object with given properties count.
-//
-// Deprecated: use IsObject().WithPropertiesCount() instead.
-func (node *AssertNode) IsObjectWithPropertiesCount(count int, msgAndArgs ...interface{}) {
-	node.t.Helper()
-	node.IsObject().WithPropertiesCount(count, msgAndArgs...)
-}
-
 // IsObject asserts that the JSON node is an object.
 // It returns ObjectAssertion to execute a chain of assertions for the node value.
 func (node *AssertNode) IsObject(msgAndArgs ...interface{}) *ObjectAssertion {

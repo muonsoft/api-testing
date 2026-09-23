@@ -9,14 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// IsArrayWithElementsCount asserts that the JSON node is an array with given elements count.
-//
-// Deprecated: use IsArray().WithLength() instead.
-func (node *AssertNode) IsArrayWithElementsCount(count int, msgAndArgs ...interface{}) {
-	node.t.Helper()
-	node.IsArray().WithLength(count, msgAndArgs...)
-}
-
 // IsArray asserts that the JSON node is an array.
 // It returns ArrayAssertion to execute a chain of assertions for the node value.
 func (node *AssertNode) IsArray(msgAndArgs ...interface{}) *ArrayAssertion {

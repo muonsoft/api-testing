@@ -68,7 +68,7 @@ func TestYourAPI(t *testing.T) {
 
 ## `assertjson` package
 
-The `assertjson` package provides fluent assertions for JSON values. Nodes are selected via [JSON Pointer](https://tools.ietf.org/html/rfc6901) or path elements. Supports strings, numbers, arrays, objects, UUID, email, URL, time, and JWT.
+The `assertjson` package provides fluent assertions for JSON values. Nodes are selected by path elements passed to `Node` and `At`. Supports strings, numbers, arrays, objects, UUID, email, URL, time, and JWT.
 
 ### Example
 
@@ -105,9 +105,9 @@ func TestYourAPI(t *testing.T) {
 
 ```go
 assertjson.LinesHas(t, body, func(lines *assertjson.AssertJSONLines) {
-    lines.At(0).Node("id").EqualToTheInteger(1)
-    lines.At(0).Node("name").EqualToTheString("Alice")
-    lines.At(1).Node("role").EqualToTheString("admin")
+    lines.At(0).Node("id").IsInteger().EqualTo(1)
+    lines.At(0).Node("name").IsString().EqualTo("Alice")
+    lines.At(1).Node("role").IsString().EqualTo("admin")
     lines.WithLength(2)
 })
 ```

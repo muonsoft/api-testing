@@ -156,34 +156,6 @@ func (node *AssertNode) UUID() uuid.UUID {
 	return node.IsUUID().Value()
 }
 
-// Nil asserts that the JSON node has a string value equals to nil UUID.
-//
-// Deprecated: use IsNil().
-func (a *UUIDAssertion) Nil(msgAndArgs ...interface{}) *UUIDAssertion {
-	return a.IsNil(msgAndArgs...)
-}
-
-// NotNil asserts that the JSON node has a string value equals to not nil UUID.
-//
-// Deprecated: use IsNotNil().
-func (a *UUIDAssertion) NotNil(msgAndArgs ...interface{}) *UUIDAssertion {
-	return a.IsNotNil(msgAndArgs...)
-}
-
-// Version asserts that the JSON node has a string value equals to UUID with the given version.
-//
-// Deprecated: use OfVersion().
-func (a *UUIDAssertion) Version(version byte, msgAndArgs ...interface{}) *UUIDAssertion {
-	return a.OfVersion(version, msgAndArgs...)
-}
-
-// Variant asserts that the JSON node has a string value equals to UUID with the given variant.
-//
-// Deprecated: use OfVariant().
-func (a *UUIDAssertion) Variant(variant byte, msgAndArgs ...interface{}) *UUIDAssertion {
-	return a.OfVariant(variant, msgAndArgs...)
-}
-
 func (a *UUIDAssertion) fail(message string, msgAndArgs ...interface{}) {
 	a.t.Helper()
 	assert.Fail(a.t, a.message+message, msgAndArgs...)

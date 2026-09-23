@@ -84,7 +84,7 @@ jobs:
       - name: Lint
         uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.6.1
+          version: v2.13.2
 
       - name: Full release validation
         run: bash scripts/test-all.sh

@@ -18,7 +18,7 @@ linters:
     - gocyclo
     - godot
     - godox
-    - gomodguard
+    - gomodguard_v2
     - goprintffuncname
     - gosec
     - importas
@@ -75,6 +75,7 @@ linters:
           - err113
           - errcheck
           - funlen
+          - goconst
           - gochecknoglobals
           - gocyclo
           - gosec
