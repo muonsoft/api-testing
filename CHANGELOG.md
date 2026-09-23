@@ -13,6 +13,16 @@ this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   CI-owned tag creation.
 - Release validation scripts, agent guidance (`AGENTS.md`), and
   [`docs/release-checklist.md`](docs/release-checklist.md).
+- Internal HS256 JWT parsing for assertions (`internal/jwt`); public JWT types
+  (`assertjson.JWTToken`, `JWTKeyFunc`, `JWTMapClaims`) and `SignHS256JWT` test helper.
+
+### Changed
+
+- JWT assertion callbacks use `assertjson` types instead of `github.com/golang-jwt/jwt/v5`.
+
+### Removed
+
+- Direct dependency on `github.com/golang-jwt/jwt/v5`.
 
 ## [0.11.0] - 2026-02-07
 

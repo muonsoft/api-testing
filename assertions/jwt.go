@@ -7,25 +7,34 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/muonsoft/api-testing/assertjson"
+	ijwt "github.com/muonsoft/api-testing/internal/jwt"
 	"github.com/stretchr/testify/assert"
 )
+
+// JWTKeyFunc supplies the verification key while parsing a JWT string.
+type JWTKeyFunc = assertjson.JWTKeyFunc
+
+// JWTToken is a parsed and verified JWT exposed to test code.
+type JWTToken = assertjson.JWTToken
+
+// JWTMapClaims is the decoded JWT payload used in assertions and test helpers.
+type JWTMapClaims = assertjson.JWTMapClaims
 
 // JWTAssertion is used to build a chain of assertions for the JWT node.
 type JWTAssertion struct {
 	t             TestingT
 	messagePrefix string
-	token         *jwt.Token
+	token         *ijwt.Token
 }
 
 // WithJWT asserts that the JSON node has a string value with JWT.
-func (a *StringAssertion) WithJWT(keyFunc jwt.Keyfunc, msgAndArgs ...interface{}) *JWTAssertion {
+func (a *StringAssertion) WithJWT(keyFunc JWTKeyFunc, msgAndArgs ...interface{}) *JWTAssertion {
 	if a == nil {
 		return nil
 	}
 	a.t.Helper()
-	token, err := jwt.Parse(a.value, keyFunc)
+	token, err := ijwt.Parse(a.value, adaptAssertionsKeyFunc(keyFunc))
 	if err == nil {
 		return &JWTAssertion{t: a.t, messagePrefix: a.messagePrefix, token: token}
 	}
@@ -84,7 +93,7 @@ func (a *JWTAssertion) WithPayload(jsonAssert assertjson.JSONAssertFunc) *JWTAss
 	jsonAssert(assertjson.NewAssertJSON(
 		a.t,
 		a.messagePrefix+`is JWT with payload: `,
-		map[string]interface{}(a.token.Claims.(jwt.MapClaims)),
+		map[string]interface{}(a.token.Claims),
 	))
 
 	return a
@@ -163,24 +172,24 @@ func (a *JWTAssertion) WithIssuedAt() *TimeAssertion {
 	return a.assertTimeField("issued at", "iat")
 }
 
-// Value returns decoded jwt.Token. If parsing fails it will return empty struct.
-func (a *JWTAssertion) Value() *jwt.Token {
+// Value returns decoded JWT. If parsing fails it will return empty struct.
+func (a *JWTAssertion) Value() *JWTToken {
 	if a == nil {
-		return &jwt.Token{}
+		return &JWTToken{}
 	}
 	a.t.Helper()
 
-	return a.token
+	return assertjson.WrapJWTToken(a.token)
 }
 
 // Assert asserts that the JWT is satisfied by the user function assertFunc.
-func (a *JWTAssertion) Assert(assertFunc func(tb testing.TB, token *jwt.Token)) *JWTAssertion {
+func (a *JWTAssertion) Assert(assertFunc func(tb testing.TB, token *JWTToken)) *JWTAssertion {
 	if a == nil {
 		return nil
 	}
 	a.t.Helper()
 
-	assertFunc(a.t.(testing.TB), a.token)
+	assertFunc(a.t.(testing.TB), assertjson.WrapJWTToken(a.token))
 
 	return a
 }
@@ -188,7 +197,7 @@ func (a *JWTAssertion) Assert(assertFunc func(tb testing.TB, token *jwt.Token)) 
 func (a *JWTAssertion) assertStringField(title string, name string, expected string, msgAndArgs ...interface{}) *JWTAssertion {
 	a.t.Helper()
 
-	raw, exist := a.token.Claims.(jwt.MapClaims)[name]
+	raw, exist := a.token.Claims[name]
 	if !exist {
 		return a.failOnMissingField(title, name, strconv.Quote(expected), msgAndArgs...)
 	}
@@ -208,7 +217,7 @@ func (a *JWTAssertion) assertStringField(title string, name string, expected str
 func (a *JWTAssertion) assertStringsField(title string, name string, expected []string, msgAndArgs ...interface{}) *JWTAssertion {
 	a.t.Helper()
 
-	raw, exist := a.token.Claims.(jwt.MapClaims)[name]
+	raw, exist := a.token.Claims[name]
 	if !exist {
 		return a.failOnMissingField(title, name, wrapArray(formatStrings(expected)), msgAndArgs...)
 	}
@@ -226,7 +235,7 @@ func (a *JWTAssertion) assertStringsField(title string, name string, expected []
 }
 
 func (a *JWTAssertion) assertTimeField(title string, name string) *TimeAssertion {
-	raw, exist := a.token.Claims.(jwt.MapClaims)[name]
+	raw, exist := a.token.Claims[name]
 	if !exist {
 		a.failOnMissingField(title, name, "")
 		return nil

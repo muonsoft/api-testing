@@ -234,11 +234,11 @@ assertjson.Has(t, data, func(json *assertjson.AssertJSON) {
 ```go
 import (
     "time"
-    "github.com/golang-jwt/jwt/v5"
+    "github.com/muonsoft/api-testing/assertjson"
 )
 
 assertjson.Has(t, data, func(json *assertjson.AssertJSON) {
-    isJWT := json.Node("jwt").IsJWT(func(token *jwt.Token) (interface{}, error) {
+    isJWT := json.Node("jwt").IsJWT(func(token *assertjson.JWTToken) (interface{}, error) {
         return []byte("your-256-bit-secret"), nil
     })
     isJWT.

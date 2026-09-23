@@ -4,7 +4,6 @@ go 1.23
 
 require (
 	github.com/gofrs/uuid/v5 v5.3.2
-	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/json-iterator/go v1.1.12
 	github.com/stretchr/testify v1.10.0
 	gopkg.in/xmlpath.v2 v2.0.0-20150820204837-860cbeca3ebc

@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid/v5"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/muonsoft/api-testing/assertjson"
 	"github.com/muonsoft/api-testing/internal/mock"
 	"github.com/stretchr/testify/assert"
@@ -128,7 +127,7 @@ func TestFileHas(t *testing.T) {
 		json.Node("date").IsDate().BeforeOrEqualToDate(2022, time.October, 16)
 
 		// JSON Web Token (JWT) assertion
-		isJWT := json.Node("jwt").IsJWT(func(token *jwt.Token) (interface{}, error) {
+		isJWT := json.Node("jwt").IsJWT(func(token *assertjson.JWTToken) (interface{}, error) {
 			return []byte("your-256-bit-secret"), nil
 		})
 		isJWT.
@@ -240,7 +239,7 @@ func TestFileHas(t *testing.T) {
 		assert.Equal(t,
 			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiaHR0cHM6Ly9hdWRpZW5jZTEuZXhhbXBsZS5jb20iLCJodHRwczovL2F1ZGllbmNlMi5leGFtcGxlLmNvbSJdLCJleHAiOjQ4MjAzNjAxMzEsImlhdCI6MTY2Njc1NjUzMSwiaXNzIjoiaHR0cHM6Ly9pc3N1ZXIuZXhhbXBsZS5jb20iLCJqdGkiOiJhYmMxMjM0NSIsIm5hbWUiOiJKb2huIERvZSIsIm5iZiI6MTY2Njc1NjUzMSwic3ViIjoiaHR0cHM6Ly9zdWJqZWN0LmV4YW1wbGUuY29tIn0.fGUvIn-BV8bPKkZdrxUneew3_qBe-knptL9a_TkNA4M",
 			json.Node("jwt").
-				IsJWT(func(token *jwt.Token) (interface{}, error) {
+				IsJWT(func(token *assertjson.JWTToken) (interface{}, error) {
 					return []byte("your-256-bit-secret"), nil
 				}).
 				Value().
@@ -249,7 +248,7 @@ func TestFileHas(t *testing.T) {
 		assert.Equal(t,
 			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiaHR0cHM6Ly9hdWRpZW5jZTEuZXhhbXBsZS5jb20iLCJodHRwczovL2F1ZGllbmNlMi5leGFtcGxlLmNvbSJdLCJleHAiOjQ4MjAzNjAxMzEsImlhdCI6MTY2Njc1NjUzMSwiaXNzIjoiaHR0cHM6Ly9pc3N1ZXIuZXhhbXBsZS5jb20iLCJqdGkiOiJhYmMxMjM0NSIsIm5hbWUiOiJKb2huIERvZSIsIm5iZiI6MTY2Njc1NjUzMSwic3ViIjoiaHR0cHM6Ly9zdWJqZWN0LmV4YW1wbGUuY29tIn0.fGUvIn-BV8bPKkZdrxUneew3_qBe-knptL9a_TkNA4M",
 			json.Node("jwt").
-				JWT(func(token *jwt.Token) (interface{}, error) {
+				JWT(func(token *assertjson.JWTToken) (interface{}, error) {
 					return []byte("your-256-bit-secret"), nil
 				}).
 				Raw,
@@ -258,7 +257,7 @@ func TestFileHas(t *testing.T) {
 		// standalone JWT assertion
 		assertjson.IsJWT(t,
 			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiaHR0cHM6Ly9hdWRpZW5jZTEuZXhhbXBsZS5jb20iLCJodHRwczovL2F1ZGllbmNlMi5leGFtcGxlLmNvbSJdLCJleHAiOjQ4MjAzNjAxMzEsImlhdCI6MTY2Njc1NjUzMSwiaXNzIjoiaHR0cHM6Ly9pc3N1ZXIuZXhhbXBsZS5jb20iLCJqdGkiOiJhYmMxMjM0NSIsIm5hbWUiOiJKb2huIERvZSIsIm5iZiI6MTY2Njc1NjUzMSwic3ViIjoiaHR0cHM6Ly9zdWJqZWN0LmV4YW1wbGUuY29tIn0.fGUvIn-BV8bPKkZdrxUneew3_qBe-knptL9a_TkNA4M",
-			func(token *jwt.Token) (interface{}, error) { return []byte("your-256-bit-secret"), nil },
+			func(token *assertjson.JWTToken) (interface{}, error) { return []byte("your-256-bit-secret"), nil },
 		).WithPayload(func(json *assertjson.AssertJSON) {
 			json.Node("name").IsString().EqualTo("John Doe")
 		})
@@ -2606,14 +2605,14 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with id",
-			json: jsonWithJWT(jwt.MapClaims{"jti": "12345"}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"jti": "12345"}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithID("12345")
 			},
 		},
 		{
 			name: "JSON node is JWT with id no field",
-			json: jsonWithJWT(jwt.MapClaims{}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithID("unexpected")
 			},
@@ -2623,7 +2622,7 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with id invalid type",
-			json: jsonWithJWT(jwt.MapClaims{"jti": 12345}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"jti": 12345}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithID("unexpected")
 			},
@@ -2633,7 +2632,7 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with id not equal",
-			json: jsonWithJWT(jwt.MapClaims{"jti": "12345"}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"jti": "12345"}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithID("unexpected")
 			},
@@ -2643,14 +2642,14 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with issuer",
-			json: jsonWithJWT(jwt.MapClaims{"iss": "expected"}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"iss": "expected"}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithIssuer("expected")
 			},
 		},
 		{
 			name: "JSON node is JWT with issuer no field",
-			json: jsonWithJWT(jwt.MapClaims{}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithIssuer("unexpected")
 			},
@@ -2660,7 +2659,7 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with issuer invalid type",
-			json: jsonWithJWT(jwt.MapClaims{"iss": 12345}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"iss": 12345}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithIssuer("unexpected")
 			},
@@ -2670,7 +2669,7 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with issuer not equal",
-			json: jsonWithJWT(jwt.MapClaims{"iss": "expected"}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"iss": "expected"}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithIssuer("unexpected")
 			},
@@ -2680,14 +2679,14 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with subject",
-			json: jsonWithJWT(jwt.MapClaims{"sub": "expected"}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"sub": "expected"}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithSubject("expected")
 			},
 		},
 		{
 			name: "JSON node is JWT with subject no field",
-			json: jsonWithJWT(jwt.MapClaims{}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithSubject("unexpected")
 			},
@@ -2697,7 +2696,7 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with subject invalid type",
-			json: jsonWithJWT(jwt.MapClaims{"sub": 12345}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"sub": 12345}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithSubject("unexpected")
 			},
@@ -2707,7 +2706,7 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with subject not equal",
-			json: jsonWithJWT(jwt.MapClaims{"sub": "expected"}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"sub": "expected"}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithSubject("unexpected")
 			},
@@ -2717,21 +2716,21 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with audience",
-			json: jsonWithJWT(jwt.MapClaims{"aud": "expected"}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"aud": "expected"}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithAudience([]string{"expected"})
 			},
 		},
 		{
 			name: "JSON node is JWT with multiple audience",
-			json: jsonWithJWT(jwt.MapClaims{"aud": []string{"one", "two"}}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"aud": []string{"one", "two"}}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithAudience([]string{"one", "two"})
 			},
 		},
 		{
 			name: "JSON node is JWT with audience no field",
-			json: jsonWithJWT(jwt.MapClaims{}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithAudience([]string{"one", "two"})
 			},
@@ -2741,7 +2740,7 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with audience invalid type",
-			json: jsonWithJWT(jwt.MapClaims{"aud": 12345}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"aud": 12345}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithAudience([]string{"unexpected"})
 			},
@@ -2751,7 +2750,7 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with audience not equal",
-			json: jsonWithJWT(jwt.MapClaims{"aud": "expected"}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"aud": "expected"}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithAudience([]string{"unexpected"})
 			},
@@ -2761,14 +2760,14 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with expires at",
-			json: jsonWithJWT(jwt.MapClaims{"exp": time.Now().Add(time.Hour).Unix()}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"exp": time.Now().Add(time.Hour).Unix()}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithExpiresAt()
 			},
 		},
 		{
 			name: "JSON node is JWT with expires at no field",
-			json: jsonWithJWT(jwt.MapClaims{}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithExpiresAt()
 			},
@@ -2778,17 +2777,17 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with expires at invalid type",
-			json: jsonWithJWT(jwt.MapClaims{"exp": "string"}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"exp": "string"}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithExpiresAt()
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "" is JWT: token has invalid claims: invalid type for claim: exp is invalid`,
+				`is JWT with expires at ("exp") : number is expected`,
 			},
 		},
 		{
 			name: "JSON node is JWT with expires at failed",
-			json: jsonWithJWT(jwt.MapClaims{"exp": parseTime("2100-01-01T00:00:00Z").Unix()}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"exp": parseTime("2100-01-01T00:00:00Z").Unix()}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithExpiresAt().AfterDate(2200, time.January, 1)
 			},
@@ -2798,14 +2797,14 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with not before",
-			json: jsonWithJWT(jwt.MapClaims{"nbf": time.Now().Add(-time.Hour).Unix()}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"nbf": time.Now().Add(-time.Hour).Unix()}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithNotBefore()
 			},
 		},
 		{
 			name: "JSON node is JWT with not before no field",
-			json: jsonWithJWT(jwt.MapClaims{}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithNotBefore()
 			},
@@ -2815,17 +2814,17 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with not before invalid type",
-			json: jsonWithJWT(jwt.MapClaims{"nbf": "string"}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"nbf": "string"}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithNotBefore()
 			},
 			wantMessages: []string{
-				`failed asserting that JSON node "" is JWT: token has invalid claims: invalid type for claim: nbf is invalid`,
+				`is JWT with not before ("nbf") : number is expected`,
 			},
 		},
 		{
 			name: "JSON node is JWT with not before failed",
-			json: jsonWithJWT(jwt.MapClaims{"nbf": parseTime("2000-01-01T00:00:00Z").Unix()}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"nbf": parseTime("2000-01-01T00:00:00Z").Unix()}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithNotBefore().AfterDate(2001, time.January, 1)
 			},
@@ -2835,14 +2834,14 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with issued at",
-			json: jsonWithJWT(jwt.MapClaims{"iat": time.Now().Add(-time.Hour).Unix()}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"iat": time.Now().Add(-time.Hour).Unix()}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithIssuedAt()
 			},
 		},
 		{
 			name: "JSON node is JWT with issued at no field",
-			json: jsonWithJWT(jwt.MapClaims{}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithIssuedAt()
 			},
@@ -2852,7 +2851,7 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with issued at invalid type",
-			json: jsonWithJWT(jwt.MapClaims{"iat": "string"}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"iat": "string"}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithIssuedAt()
 			},
@@ -2862,7 +2861,7 @@ func TestHas(t *testing.T) {
 		},
 		{
 			name: "JSON node is JWT with issued at failed",
-			json: jsonWithJWT(jwt.MapClaims{"iat": parseTime("2000-01-01T00:00:00Z").Unix()}),
+			json: jsonWithJWT(assertjson.JWTMapClaims{"iat": parseTime("2000-01-01T00:00:00Z").Unix()}),
 			assert: func(json *assertjson.AssertJSON) {
 				json.Node().IsJWT(getJWTSecret).WithIssuedAt().AfterDate(2001, time.January, 1)
 			},
@@ -3130,13 +3129,12 @@ func TestAssertNode_Exists(t *testing.T) {
 
 const tokenSecret = "your-256-bit-secret"
 
-func getJWTSecret(_ *jwt.Token) (interface{}, error) {
+func getJWTSecret(_ *assertjson.JWTToken) (interface{}, error) {
 	return []byte(tokenSecret), nil
 }
 
-func jsonWithJWT(claims jwt.MapClaims) string {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	s, err := token.SignedString([]byte(tokenSecret))
+func jsonWithJWT(claims assertjson.JWTMapClaims) string {
+	s, err := assertjson.SignHS256JWT(claims, []byte(tokenSecret))
 	if err != nil {
 		panic(err)
 	}

@@ -6,7 +6,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/muonsoft/api-testing/apitest"
 	"github.com/muonsoft/api-testing/assertjson"
 	"github.com/muonsoft/api-testing/internal/mock"
@@ -418,6 +417,6 @@ func TestAssertResponse(t *testing.T) {
 
 const tokenSecret = "your-256-bit-secret"
 
-func getJWTSecret(_ *jwt.Token) (interface{}, error) {
+func getJWTSecret(_ *assertjson.JWTToken) (interface{}, error) {
 	return []byte(tokenSecret), nil
 }
