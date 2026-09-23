@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid/v5"
-	"github.com/muonsoft/api-testing/jwt"
 	"github.com/muonsoft/api-testing/assertjson"
 	"github.com/muonsoft/api-testing/internal/mock"
+	"github.com/muonsoft/api-testing/jwt"
 	"github.com/stretchr/testify/assert"
 )
 

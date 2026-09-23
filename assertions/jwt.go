@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/muonsoft/api-testing/jwt"
 	"github.com/muonsoft/api-testing/assertjson"
+	"github.com/muonsoft/api-testing/jwt"
 	"github.com/stretchr/testify/assert"
 )
 

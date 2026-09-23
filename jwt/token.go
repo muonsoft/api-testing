@@ -11,12 +11,12 @@ type Keyfunc func(*Token) (interface{}, error)
 
 // Token represents a JWT.
 type Token struct {
-	Raw      string
-	Method   SigningMethod
-	Header   map[string]interface{}
-	Claims   MapClaims
+	Raw       string
+	Method    SigningMethod
+	Header    map[string]interface{}
+	Claims    MapClaims
 	Signature []byte
-	Valid    bool
+	Valid     bool
 }
 
 // NewWithClaims creates a new Token with the given signing method and claims.

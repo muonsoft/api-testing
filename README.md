@@ -21,6 +21,10 @@
 go get github.com/muonsoft/api-testing
 ```
 
+User-visible changes are recorded in [CHANGELOG.md](CHANGELOG.md). Maintainers publish
+versions through the GitHub Actions Release workflow; see
+[docs/release-checklist.md](docs/release-checklist.md).
+
 ---
 
 ## `apitest` package
