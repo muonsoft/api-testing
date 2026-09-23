@@ -7,14 +7,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/muonsoft/api-testing/jwt"
+	ijwt "github.com/muonsoft/api-testing/internal/jwt"
 	"github.com/stretchr/testify/assert"
 )
 
 // IsJWT asserts that the string contains valid JWT.
-func IsJWT(t TestingT, value string, keyFunc jwt.Keyfunc) *JWTAssertion {
+func IsJWT(t TestingT, value string, keyFunc JWTKeyFunc) *JWTAssertion {
 	t.Helper()
-	token, err := jwt.Parse(value, keyFunc)
+	token, err := parseJWT(value, keyFunc)
 	if err == nil {
 		return &JWTAssertion{t: t, token: token}
 	}
@@ -29,22 +29,22 @@ type JWTAssertion struct {
 	t       TestingT
 	message string
 	path    string
-	token   *jwt.Token
+	token   *ijwt.Token
 }
 
 // IsJWT asserts that the JSON node has a string value with JWT.
-func (node *AssertNode) IsJWT(keyFunc jwt.Keyfunc, msgAndArgs ...interface{}) *JWTAssertion {
+func (node *AssertNode) IsJWT(keyFunc JWTKeyFunc, msgAndArgs ...interface{}) *JWTAssertion {
 	node.t.Helper()
 	return node.IsString().WithJWT(keyFunc, msgAndArgs...)
 }
 
 // WithJWT asserts that the JSON node has a string value with JWT.
-func (a *StringAssertion) WithJWT(keyFunc jwt.Keyfunc, msgAndArgs ...interface{}) *JWTAssertion {
+func (a *StringAssertion) WithJWT(keyFunc JWTKeyFunc, msgAndArgs ...interface{}) *JWTAssertion {
 	if a == nil {
 		return nil
 	}
 	a.t.Helper()
-	token, err := jwt.Parse(a.value, keyFunc)
+	token, err := parseJWT(a.value, keyFunc)
 	if err == nil {
 		return &JWTAssertion{t: a.t, message: a.message, path: a.path, token: token}
 	}
@@ -186,30 +186,30 @@ func (a *JWTAssertion) WithIssuedAt() *TimeAssertion {
 	return a.assertTimeField("issued at", "iat")
 }
 
-// Value returns decoded jwt.Token. If parsing fails it will return empty struct.
-func (a *JWTAssertion) Value() *jwt.Token {
+// Value returns decoded JWT. If parsing fails it will return empty struct.
+func (a *JWTAssertion) Value() *JWTToken {
 	if a == nil {
-		return &jwt.Token{}
+		return &JWTToken{}
 	}
 	a.t.Helper()
 
-	return a.token
+	return WrapJWTToken(a.token)
 }
 
-// JWT asserts that the JSON node is JWT and returns decoded jwt.Token. If value is not a valid JWT,
+// JWT asserts that the JSON node is JWT and returns decoded JWT. If value is not a valid JWT,
 // then it will return empty struct. It is an alias for IsJWT().Value().
-func (node *AssertNode) JWT(keyFunc jwt.Keyfunc) *jwt.Token {
+func (node *AssertNode) JWT(keyFunc JWTKeyFunc) *JWTToken {
 	return node.IsJWT(keyFunc).Value()
 }
 
 // Assert asserts that the JWT is satisfied by the user function assertFunc.
-func (a *JWTAssertion) Assert(assertFunc func(tb testing.TB, token *jwt.Token)) *JWTAssertion {
+func (a *JWTAssertion) Assert(assertFunc func(tb testing.TB, token *JWTToken)) *JWTAssertion {
 	if a == nil {
 		return nil
 	}
 	a.t.Helper()
 
-	assertFunc(a.t.(testing.TB), a.token)
+	assertFunc(a.t.(testing.TB), WrapJWTToken(a.token))
 
 	return a
 }
