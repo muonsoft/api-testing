@@ -1,0 +1,3 @@
+github.com/muonsoft/api-testing/apitest
+github.com/muonsoft/api-testing/assertjson
+github.com/muonsoft/api-testing/assertxml
