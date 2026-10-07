@@ -93,7 +93,7 @@ jobs:
           echo '## Security scan incomplete: checkout, setup or scanner installation failed. See job logs; no clean result is available.' | tee "$RUNNER_TEMP/security-report/summary.md" >> "$GITHUB_STEP_SUMMARY"
       - name: Upload security report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: security
           path: ${{ runner.temp }}/security-report
